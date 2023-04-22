@@ -4,7 +4,11 @@
 
 <p>The OneSparkJs engine follows a theatrical metaphor, with the StageType representing a virtual stage where StageObjects are placed.  The StageObjects in the engine are hierarchical, which means that a single StageObject can be composed of a combination of other StageObjects. Further, these StageObjects can be extended with additional properties and behaviors, and can interact with each other in various ways.</p><p>In addition to the basic properties of StageObjects, they can also be extended by other libraries. For example, the Physics library extends StageObjects to respond to physical properties such as gravity and collisions, while the UI library extends StageObjects to become UI elements such as textboxes and buttons.</p><p>Assets in the engine are referenced in a JSON asset sheet, which can contain information about various types of assets including audio and images. This allows for easy management and loading of assets within the engine.</p><p>One unique feature of the engine is the ability to switch out the entire stage with another stage, similar to changing screens in a game. This can allow for different game modes or levels to be seamlessly transitioned between.</p>
 
-<p>Game Example: <a href="http://www.onstaging.com/onesparkjs/sample.html">Click here for a game example. I made this in a day!</a></p>
+<h1>Game Example: Retro Style Asteroid Blaster</h1> 
+
+<p><a href="http://www.onstaging.com/onesparkjs/sample.html">Click here to play.  I build this in less than a day!</a></p>
+
+<p>Asteroid Blaster is a fast-paced, arcade-style game where players take control of a spaceship and must navigate through an asteroid field while shooting down incoming asteroids to survive. The game features simple yet challenging gameplay, with players having to dodge and weave through incoming asteroids while aiming their shots carefully to take out as many as possible. As players progress through the game, the asteroids become faster and more difficult to avoid, requiring quick reflexes and precise aiming skills to survive.</p>
 
 <h1>$1S API (1sparkjs.js)</h1> 
 <p>The $1S API is a JavaScript library for building interactive web applications. It provides a set of modules that can be used to add functionality to your application, including graphics rendering, audio playback, data loading, and more.</p>
