@@ -1,0 +1,20 @@
+﻿{
+     "audio": [
+          {
+               "name": "explosion",
+               "path": "/sample/assets/audio/explosion.mp3"
+          },
+          {
+               "name": "laser",
+               "path": "/sample/assets/audio/laser.mp3"
+          },
+          {
+               "name": "rocket",
+               "path": "/sample/assets/audio/rocket-loop.wav"
+          },
+          {
+               "name": "ambient space",
+               "path": "/sample/assets/audio/space.wav"
+          }
+     ]
+}
