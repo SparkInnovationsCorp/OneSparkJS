@@ -10,6 +10,8 @@
 
 <p>Asteroid Blaster is a fast-paced, arcade-style game where players take control of a spaceship and must navigate through an asteroid field while shooting down incoming asteroids to survive. The game features simple yet challenging gameplay, with players having to dodge and weave through incoming asteroids while aiming their shots carefully to take out as many as possible. As players progress through the game, the asteroids become faster and more difficult to avoid, requiring quick reflexes and precise aiming skills to survive.</p>
 
+<p><b>Note, this requires a keyboard. I will make a mobile version in the future.</b></p>
+
 <h1>$1S API (1sparkjs.js)</h1> 
 <p>The $1S API is a JavaScript library for building interactive web applications. It provides a set of modules that can be used to add functionality to your application, including graphics rendering, audio playback, data loading, and more.</p>
 
