@@ -1,0 +1,14 @@
+﻿sample-sprit-sheet.png was created by isaiah658
+
+---------------------------------------------
+https://openclipart.org/detail/248259/retro-character-sprite-sheet
+
+Retro Character Sprite Sheet
+by isaiah658 - uploaded on May 6, 2016, 4:21 pm
+
+Another sprite sheet that I made. Has the basic movements of up, down, left, and right. The animation looks a lot better than my previous sprite sheet. Consider this a template that anyone can use to make other sprites. I encourage you to try and make different characters with this example and share them on openclipart. :)
+
+
+
+
+
