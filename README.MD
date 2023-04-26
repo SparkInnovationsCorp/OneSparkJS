@@ -6,15 +6,15 @@
 
 <h1>Physics Engine Demo</h1> 
 
-<p><a href="http://www.onstaging.com/onesparkjs/sample3.html">Click here to play.  I build this in less than a day!</a></p>
+<p><a href="http://www.onstaging.com/onesparkjs/sample3.html">Click here to view.</a></p>
 
 <h1>Sprite Manager, Layout Container, &amp; Asset Manager Demo </h1> 
 
-<p><a href="http://www.onstaging.com/onesparkjs/sample2.html">Click here to play.  I build this in less than a day!</a></p>
+<p><a href="http://www.onstaging.com/onesparkjs/sample2.html">Click here to view.</a></p>
 
 <h1>Game Example: Retro Style Asteroid Blaster</h1> 
 
-<p><a href="http://www.onstaging.com/onesparkjs/sample.html">Click here to play.  I build this in less than a day!</a></p>
+<p><a href="http://www.onstaging.com/onesparkjs/sample.html">Click here to view.  PS I made this in less than a day and its still a WIP.</a></p>
 
 <p>Asteroid Blaster is a fast-paced, arcade-style game where players take control of a spaceship and must navigate through an asteroid field while shooting down incoming asteroids to survive. The game features simple yet challenging gameplay, with players having to dodge and weave through incoming asteroids while aiming their shots carefully to take out as many as possible. As players progress through the game, the asteroids become faster and more difficult to avoid, requiring quick reflexes and precise aiming skills to survive.</p>
 
