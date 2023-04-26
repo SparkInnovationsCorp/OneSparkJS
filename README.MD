@@ -4,6 +4,14 @@
 
 <p>The OneSparkJs engine follows a theatrical metaphor, with the StageType representing a virtual stage where StageObjects are placed.  The StageObjects in the engine are hierarchical, which means that a single StageObject can be composed of a combination of other StageObjects. Further, these StageObjects can be extended with additional properties and behaviors, and can interact with each other in various ways.</p><p>In addition to the basic properties of StageObjects, they can also be extended by other libraries. For example, the Physics library extends StageObjects to respond to physical properties such as gravity and collisions, while the UI library extends StageObjects to become UI elements such as textboxes and buttons.</p><p>Assets in the engine are referenced in a JSON asset sheet, which can contain information about various types of assets including audio and images. This allows for easy management and loading of assets within the engine.</p><p>One unique feature of the engine is the ability to switch out the entire stage with another stage, similar to changing screens in a game. This can allow for different game modes or levels to be seamlessly transitioned between.</p>
 
+<h1>Physics Engine Demo</h1> 
+
+<p><a href="http://www.onstaging.com/onesparkjs/sample3.html">Click here to play.  I build this in less than a day!</a></p>
+
+<h1>Sprite Manager, Layout Container, &amp; Asset Manager Demo </h1> 
+
+<p><a href="http://www.onstaging.com/onesparkjs/sample2.html">Click here to play.  I build this in less than a day!</a></p>
+
 <h1>Game Example: Retro Style Asteroid Blaster</h1> 
 
 <p><a href="http://www.onstaging.com/onesparkjs/sample.html">Click here to play.  I build this in less than a day!</a></p>

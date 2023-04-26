@@ -1,9 +1,22 @@
 ﻿{
-     "audio": [],
+     "audio": [
+          {
+               "name": "steps",
+               "path": "/sample2/assets/audio/footsteps.mp3"
+          }
+     ],
      "images": [
           {
                "name": "logo",
                "path": "/sample2/assets/images/sample-logo.png"
+          },
+          {
+               "name": "grass",
+               "path": "/sample2/assets/images/grass.png"
+          },
+          {
+               "name": "grassbottom",
+               "path": "/sample2/assets/images/bottom.png"
           },
           {
                "group": "walk-forward",
@@ -184,6 +197,363 @@
                          ]
                     }
                ]
+          },
+          {
+               "group": "walk-left",
+               "path": "/sample2/assets/images/sample-sprite-sheet.png",
+               "clipPaths": [
+                    {
+                         "name": "walkr-1",
+                         "clipPath": [
+                              {
+                                   "x": 0,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 134,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 134,
+                                   "y": 600
+                              },
+                              {
+                                   "x": 0,
+                                   "y": 600
+                              }
+                         ]
+                    },
+                    {
+                         "name": "walkr-2",
+                         "clipPath": [
+                              {
+                                   "x": 135,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 268,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 268,
+                                   "y": 600
+                              },
+                              {
+                                   "x": 135,
+                                   "y": 600
+                              }
+                         ]
+                    },
+                    {
+                         "name": "walkr-3",
+                         "clipPath": [
+                              {
+                                   "x": 267,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 402,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 402,
+                                   "y": 600
+                              },
+                              {
+                                   "x": 267,
+                                   "y": 600
+                              }
+                         ]
+                    },
+                    {
+                         "name": "walkr-4",
+                         "clipPath": [
+                              {
+                                   "x": 403,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 536,
+                                   "y": 401
+                              },
+                              {
+                                   "x": 536,
+                                   "y": 600
+                              },
+                              {
+                                   "x": 403,
+                                   "y": 600
+                              }
+                         ]
+                    }
+               ]
+          },
+          {
+               "group": "walk-right",
+               "path": "/sample2/assets/images/sample-sprite-sheet.png",
+               "clipPaths": [
+                    {
+                         "name": "walkl-1",
+                         "clipPath": [
+                              {
+                                   "x": 0,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 134,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 134,
+                                   "y": 800
+                              },
+                              {
+                                   "x": 0,
+                                   "y": 800
+                              }
+                         ]
+                    },
+                    {
+                         "name": "walkl-2",
+                         "clipPath": [
+                              {
+                                   "x": 135,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 268,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 268,
+                                   "y": 800
+                              },
+                              {
+                                   "x": 135,
+                                   "y": 800
+                              }
+                         ]
+                    },
+                    {
+                         "name": "walkl-3",
+                         "clipPath": [
+                              {
+                                   "x": 267,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 402,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 402,
+                                   "y": 800
+                              },
+                              {
+                                   "x": 267,
+                                   "y": 800
+                              }
+                         ]
+                    },
+                    {
+                         "name": "walkl-4",
+                         "clipPath": [
+                              {
+                                   "x": 403,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 536,
+                                   "y": 601
+                              },
+                              {
+                                   "x": 536,
+                                   "y": 800
+                              },
+                              {
+                                   "x": 403,
+                                   "y": 800
+                              }
+                         ]
+                    }
+               ]
+          }
+
+     ],
+     "layouts": [
+          {
+               "name": "demo",
+               "tiles": [
+                    {
+                         "x": 0,
+                         "y": 0,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 200,
+                         "y": 0,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 400,
+                         "y": 0,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 600,
+                         "y": 0,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 800,
+                         "y": 0,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 1000,
+                         "y": 0,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 0,
+                         "y": 200,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 200,
+                         "y": 200,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 400,
+                         "y": 200,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 600,
+                         "y": 200,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 800,
+                         "y": 200,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 1000,
+                         "y": 200,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 0,
+                         "y": 400,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 200,
+                         "y": 400,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 400,
+                         "y": 400,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 600,
+                         "y": 400,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 800,
+                         "y": 400,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 1000,
+                         "y": 400,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grass"
+                    },
+                    {
+                         "x": 0,
+                         "y": 555,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grassbottom"
+                    },
+                    {
+                         "x": 200,
+                         "y": 555,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grassbottom"
+                    },
+                    {
+                         "x": 400,
+                         "y": 555,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grassbottom"
+                    },
+                    {
+                         "x": 600,
+                         "y": 555,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grassbottom"
+                    },
+                    {
+                         "x": 800,
+                         "y": 555,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grassbottom"
+                    },
+                    {
+                         "x": 1000,
+                         "y": 555,
+                         "frameRate": 12,
+                         "frameStart": 0,
+                         "imageName": "grassbottom"
+                    }
+               ]
           }
      ]
+
 }
