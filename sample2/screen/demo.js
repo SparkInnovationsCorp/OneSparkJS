@@ -6,8 +6,15 @@
 
           this.inFront = true;
           this.audioOn = false;
+          this.initialized = false;
 
-          this.initializeControls();
+          var base = this;
+          setTimeout(function () {
+
+               base.initializeControls();
+
+          }, 500);
+
      }
 
      initializeControls() {
@@ -50,6 +57,7 @@
           
           this.currentSegment = 0;
 
+          this.initialized = true;
      }
 
 
@@ -65,6 +73,8 @@
 
 
      onUpdate(timeStamp, deltaTime) {
+          if (!this.initialized) return;
+
           //Walk our man in a square
           const elapsed = timeStamp % (this.timePerSegment * this.points.length);
 
@@ -104,6 +114,7 @@
      }
 
      onDrawBeforeProp(context, prop) {
+          if (!this.initialized) return;
 
           if (prop.Instance.id == this.sprite.id && this.inFront) {
 
@@ -123,6 +134,7 @@
      }
 
      onPostDraw(context, prop) {
+          if (!this.initialized) return;
 
           if (!this.inFront) {
 
