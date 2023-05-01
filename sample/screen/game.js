@@ -168,7 +168,7 @@ class Game extends $1S.Renderer.Type.StageType {
           $1S.Application.get().stageEventHandler("exit", this);
      }
 
-     onUpdate(timeStamp, deltaTime) {
+     onTick(timeStamp, deltaTime) {
           this.lblScore.text = "Score: " + this.score.toString();
 
           for (var i = this.asteroids.length - 1; i >= 0; i--) {
@@ -233,9 +233,6 @@ class Game extends $1S.Renderer.Type.StageType {
 
      }
 
-     onDestroy() {
-
-     }
 }
 
 $1S.registerType(Game, "Game");

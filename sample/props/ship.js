@@ -111,7 +111,7 @@ class Ship extends $1S.Physics.Types.PhysicsBoundType {
                this.friction.friction = this.frictionNormal;
      }
 
-     onCollide(collisionObjects) {
+     onCollision(collisionObjects) {
           $1S.Renderer.get().Instance.shipCollision(collisionObjects);
      }
 

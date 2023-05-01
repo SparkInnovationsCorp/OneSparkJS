@@ -36,7 +36,7 @@
           this.updateDrawing = true;
      }
 
-     onUpdate(timeStamp, deltaTime) {
+     onTick(timeStamp, deltaTime) {
 
      }
 

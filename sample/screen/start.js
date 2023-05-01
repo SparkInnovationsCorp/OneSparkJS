@@ -82,7 +82,7 @@
           this.stars.push({ x, y, speed, size, angle, distance });
      }
 
-     onUpdate(timeStamp, deltaTime) {
+     onTick(timeStamp, deltaTime) {
           this.stars.forEach((star, index) => {
                star.distance += star.speed * deltaTime;
                star.x = this.centerX + Math.cos(star.angle) * star.distance;
@@ -109,7 +109,7 @@
           });
      }
 
-     onDestroy() {
+     onDispose() {
           this.stars = [];
      }
 }

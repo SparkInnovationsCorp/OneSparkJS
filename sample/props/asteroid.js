@@ -73,7 +73,7 @@
           this.rotationSpeed = (Math.random() * 0.5) - 0.25;
      }
 
-     onCollide(collisionObjects) {
+     onCollision(collisionObjects) {
           $1S.Renderer.get().Instance.asteroidCollision(this, collisionObjects);
      }
 

@@ -1,4 +1,6 @@
-﻿class Demo extends $1S.Renderer.Type.StageType {
+﻿const Logo = await $1S.import("Logo", "../props/logo.js");
+
+class Demo extends $1S.Renderer.Type.StageType {
 
      onInit(properties) {
           this.centerX = this.width / 2;
@@ -19,16 +21,23 @@
 
      initializeControls() {
 
-          this.layoutContainer = new $1S.Renderer.Type.LayoutType("demo",{ width: this.width, height: this.height, x: 0, y: 0, alignOn: $1S.Renderer.Type.AlignOn.UpperLeft });
+          //turn on z depth sorting for rendering.  by default, its by priority unless this is set.
+          this.setRenderSort($1S.Renderer.Type.SortBy.ByDepth);
+
+          this.layoutContainer = new $1S.Renderer.Type.LayoutType("demo",{ width: this.width, height: this.height, x: 0, y: 0, z: 0, alignOn: $1S.Renderer.Type.AlignOn.UpperLeft });
           this.registerProp(this.layoutContainer);
 
-          this.sprite = new $1S.Renderer.Type.SpriteType({ groupName: "walk-right", framesPerSecond: 12, x: 100, y: 100 });
+          this.sprite = new $1S.Renderer.Type.SpriteType({ groupName: "walk-right", framesPerSecond: 12, x: 200, y: 200, z: 200 });
           this.registerProp(this.sprite);
+
+          this.logo = new Logo({ x: 200, y: 150, z: 450, alignOn: $1S.Renderer.Type.AlignOn.UpperLeft });
+          this.registerProp(this.logo);
 
           var btn = new $1S.UI.Controls.Button(
                {
                     x: this.width / 2,
                     y: 670,
+                    z: 1000,
                     fontSize: 16,
                     width: 200,
                     height: 40,
@@ -38,7 +47,7 @@
                     onClick: this.toggleAudio.bind(this)
                });
 
-          this.registerProp(btn, {});
+          this.registerProp(btn);
 
           this.points = [
                { x: 100, y: 70, group: "walk-right", inFront: true },
@@ -62,7 +71,6 @@
 
 
      toggleAudio(e) {
-
           this.audioOn = !this.audioOn;
 
           if (this.audioOn)
@@ -72,7 +80,7 @@
      }
 
 
-     onUpdate(timeStamp, deltaTime) {
+     onTick(timeStamp, deltaTime) {
           if (!this.initialized) return;
 
           //Walk our man in a square
@@ -85,7 +93,9 @@
 
                //change the sprite showing!
                this.sprite.show(this.points[this.currentSegment].group);
-               this.inFront = this.points[this.currentSegment].inFront;
+
+               //we tie z to y.  The lower on the screen, the closer to the camera.
+               this.sprite.z = this.sprite.y;
           }
 
           // Calculate the sprite's position based on the current segment
@@ -111,46 +121,6 @@
                const distance = Math.sqrt((point.x - lastPoint.x) ** 2 + (point.y - lastPoint.y) ** 2);
                return total + distance / this.walkSpeed;
           }, 0);
-     }
-
-     onDrawBeforeProp(context, prop) {
-          if (!this.initialized) return;
-
-          if (prop.Instance.id == this.sprite.id && this.inFront) {
-
-               context.fillStyle = 'black';
-               context.fillRect(200, 150, 624, 368);
-
-               const image = $1S.Renderer.Graphics.getImage("logo");
-               const imageCanvas = image.Canvas;
-               const imageContext = image.CanvasContext;
-
-               const x = (this.width / 2) - (imageCanvas.width / 2);
-               const y = (this.height / 2) - (imageCanvas.height / 2) - 50;
-               context.drawImage(imageCanvas, x, y);
-
-          }
-
-     }
-
-     onPostDraw(context, prop) {
-          if (!this.initialized) return;
-
-          if (!this.inFront) {
-
-               context.fillStyle = 'black';
-               context.fillRect(200, 150, 624, 368);
-
-               const image = $1S.Renderer.Graphics.getImage("logo");
-               const imageCanvas = image.Canvas;
-               const imageContext = image.CanvasContext;
-
-               const x = (this.width / 2) - (imageCanvas.width / 2);
-               const y = (this.height / 2) - (imageCanvas.height / 2) - 50;
-               context.drawImage(imageCanvas, x, y);
-
-          }
-
      }
 
 }

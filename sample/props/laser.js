@@ -15,7 +15,7 @@
           stage.destroyProp(this.id);
      }
 
-     onUpdate(timeStamp, deltaTime) {
+     onTick(timeStamp, deltaTime) {
           if (this.isOffScreen()) {
                this.destroy();
           }

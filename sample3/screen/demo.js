@@ -50,7 +50,7 @@ class Demo extends $1S.Renderer.Type.StageType {
      }
 
 
-     onUpdate(timeStamp, deltaTime) {
+     onTick(timeStamp, deltaTime) {
      }
 
      onDraw(context) {
