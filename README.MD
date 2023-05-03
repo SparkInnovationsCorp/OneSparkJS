@@ -20,12 +20,12 @@
 
 <p><b>Note, this requires a keyboard. I will make a mobile version in the future.</b></p>
 
-<h1>Project Environment</h1> 
+<h1>Developement</h1> 
 
-<p>Make sure you install bundle to compile this project correctly.</p>
+<p>Make sure you install dev dependencies before developing.  This project uses rollup and uglify to merge and minify javascript code.</p>
 
 <pre>
-npm install --global rollup
+npm install
 </pre>
 
 <p>To compile:</p>

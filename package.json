@@ -1,6 +1,8 @@
 {
   "devDependencies": {
+    "javascript-obfuscator": "^4.0.2",
     "rollup": "^3.21.3",
+    "rollup-plugin-obfuscator": "^1.0.3",
     "rollup-plugin-uglify": "^6.0.4"
   }
 }
