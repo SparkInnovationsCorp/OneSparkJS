@@ -15,7 +15,7 @@
           this.workContext.fillStyle = 'black';
           this.workContext.fillRect(0, 0, this.width, this.height);
 
-          const image = $1S.Renderer.Graphics.getImage("logo");
+          const image = $1S.Assets.getImage("logo");
           const imageCanvas = image.Canvas;
           const imageContext = image.CanvasContext;
 

@@ -53,14 +53,14 @@ class Game extends $1S.Renderer.Type.StageType {
 
           //$1S.Renderer.Graphics.setFullScreen(true);
 
-          $1S.IO.Input.attach($1S.IO.Input.EventTypes.KEY_UP,
+          $1S.IO.Input.attach($1S.IO.Input.EventType.KEY_UP,
                this.id,
                (event) => {
                     this.keys[event.code] = false;
                     return true;
                });
 
-          $1S.IO.Input.attach($1S.IO.Input.EventTypes.KEY_DOWN,
+          $1S.IO.Input.attach($1S.IO.Input.EventType.KEY_DOWN,
                this.id,
                (event) => {
                     this.keys[event.code] = true;

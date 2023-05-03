@@ -54,7 +54,7 @@
                onShowStage() {
                     const region = this.region;
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_MOVE,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_MOVE,
                          this.id,
                          (event) => {
                               $1S.Renderer.Graphics.getStyle().cursor = "pointer";
@@ -63,7 +63,7 @@
                          100, region);
 
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_ENTER,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_ENTER,
                          this.id,
                          (event) => {
                               $1S.Renderer.Graphics.getStyle().cursor = "pointer";
@@ -71,7 +71,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_LEAVE,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_LEAVE,
                          this.id,
                          (event) => {
                               $1S.Renderer.Graphics.getStyle().cursor = "default";
@@ -79,18 +79,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_CLICK,
-                         this.id,
-                         (event) => {
-                              console.log("click");
-                              this.isFocused = true;
-                              this.setCursorPosition(event.offsetX);
-                              this.startCursorBlinking();
-                              return true;
-                         },
-                         100, region);
-
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.TAP,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_CLICK,
                          this.id,
                          (event) => {
                               this.isFocused = true;
@@ -100,7 +89,17 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_CLICK_OUT,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.TAP,
+                         this.id,
+                         (event) => {
+                              this.isFocused = true;
+                              this.setCursorPosition(event.offsetX);
+                              this.startCursorBlinking();
+                              return true;
+                         },
+                         100, region);
+
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_CLICK_OUT,
                          this.id,
                          (event) => {
                               this.isFocused = false;
@@ -109,7 +108,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.TAP_OUT,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.TAP_OUT,
                          this.id,
                          (event) => {
                               this.isFocused = false;
@@ -118,7 +117,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.KEY_DOWN,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.KEY_DOWN,
                          this.id,
                          (event) => {
                               if (this.isEditable && this.isFocused) {
@@ -207,8 +206,6 @@
                     for (let i = 0; i <= this.text.length; i++) {
                          const distance = Math.abs(this.getXPositionForCursorPosition(i) - localX);
 
-                         console.log("distance", distance);
-
                          if (distance < minDistance) {
                               minDistance = distance;
                               nearestPosition = i;
@@ -282,7 +279,7 @@
                     const region = this.getRegion();
 
                     //TODO:right now the mouse_enter and mouse_leave need this event subscribedd to.  fix this.
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_MOVE,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_MOVE,
                          this.id,
                          (event) => {
                               $1S.Renderer.Graphics.getStyle().cursor = "pointer";
@@ -291,7 +288,7 @@
                          100, region);
 
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_ENTER,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_ENTER,
                          this.id,
                          (event) => {
                               $1S.Renderer.Graphics.getStyle().cursor = "pointer";
@@ -299,7 +296,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_LEAVE,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_LEAVE,
                          this.id,
                          (event) => {
                               $1S.Renderer.Graphics.getStyle().cursor = "default";
@@ -307,7 +304,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_CLICK,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_CLICK,
                          this.id,
                          (event) => {
                               this.state = "down";
@@ -326,7 +323,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.TAP,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.TAP,
                          this.id,
                          (event) => {
                               if (this.onClickHandler) {
@@ -344,7 +341,7 @@
                          },
                          100, region);
 
-                    $1S.IO.Input.attach($1S.IO.Input.EventTypes.MOUSE_UP,
+                    $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_UP,
                          this.id,
                          (event) => {
                               if (this.stateIsDown)
@@ -503,6 +500,11 @@
                constructor() {
                     super(0);
                };
+
+               onLoad = (appPath, properties, oncomplete) => {
+                    //does nothing for now
+                    oncomplete()
+               }
 
                onTick = (timeStamp, deltaTime) => {
                     throw new Error("onTick not implemented");

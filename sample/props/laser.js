@@ -37,6 +37,26 @@
 
      }
 
+     isOffScreen(obj) {
+
+          const r = this.getRegion();
+
+          // Calculate the edges of the shape
+          const leftEdge = r.x1;
+          const rightEdge = r.x2;
+          const topEdge = r.y1;
+          const bottomEdge = r.y2;
+
+          // Check if any of the edges are outside the canvas bounds
+          const isOffLeft = rightEdge < 0;
+          const isOffRight = leftEdge > this.screenWidth;
+          const isOffTop = bottomEdge < 0;
+          const isOffBottom = topEdge > this.screenHeight;
+
+          // Return true if all edges are offscreen, false otherwise
+          return isOffLeft || isOffRight || isOffTop || isOffBottom;
+     }
+
 }
 
 $1S.registerType(await Laser, "Laser");

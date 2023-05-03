@@ -10,21 +10,10 @@ class Demo extends $1S.Renderer.Type.StageType {
           this.audioOn = false;
           this.initialized = false;
 
-          var base = this;
-          setTimeout(function () {
-
-               base.initializeControls();
-
-          }, 500);
-
-     }
-
-     initializeControls() {
-
           //turn on z depth sorting for rendering.  by default, its by priority unless this is set.
           this.setRenderSort($1S.Renderer.Type.SortBy.ByDepth);
 
-          this.layoutContainer = new $1S.Renderer.Type.LayoutType("demo",{ width: this.width, height: this.height, x: 0, y: 0, z: 0, alignOn: $1S.Renderer.Type.AlignOn.UpperLeft });
+          this.layoutContainer = new $1S.Renderer.Type.TilesetType("demo", { width: this.width, height: this.height, x: 0, y: 0, z: 0, alignOn: $1S.Renderer.Type.AlignOn.UpperLeft });
           this.registerProp(this.layoutContainer);
 
           this.sprite = new $1S.Renderer.Type.SpriteType({ groupName: "walk-right", framesPerSecond: 12, x: 200, y: 200, z: 200 });
@@ -63,16 +52,17 @@ class Demo extends $1S.Renderer.Type.StageType {
           this.walkSpeed = 2; //pixel per ms;
 
           this.timePerSegment = this.calculateTimePerSegment(this.points);
-          
+
           this.currentSegment = 0;
 
           this.initialized = true;
+
      }
 
 
      toggleAudio(e) {
           this.audioOn = !this.audioOn;
-
+          console.log("tick");
           if (this.audioOn)
                $1S.Audio.play("steps", true);
           else

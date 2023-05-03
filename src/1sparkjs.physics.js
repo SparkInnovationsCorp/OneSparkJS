@@ -532,6 +532,11 @@
                     super(0);
                };
 
+               onLoad = (appPath, properties, oncomplete) => {
+                    //does nothing for now
+                    oncomplete()
+               }
+
                handlePostTickEvent = (timeStamp, deltaTime) => {
                     this.detectCollisions();
                }
