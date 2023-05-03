@@ -5,19 +5,6 @@ class Game extends $1S.Renderer.Type.StageType {
 
      onInit(properties) {
           this.resetStage();
-          this.initializeControls();
-     }
-
-     resetStage() {
-          this.stars = [];
-          this.starCount = 100;
-          this.asteroids = [];
-          this.score = 0;
-          this.hits = 0;
-          this.densityFactor = 1; 
-     }
-
-     initializeControls() {
 
           this.lblScore = new $1S.UI.Controls.Label(
                {
@@ -59,16 +46,112 @@ class Game extends $1S.Renderer.Type.StageType {
           this.registerProp(this.exitButton, {}, 10000);
           this.registerProp(this.player, {}, 100);
 
+     }
+
+     onShowStage() {
           this.keys = {};
 
-          window.addEventListener('keydown', (event) => {
-               this.keys[event.code] = true;
+          //$1S.Renderer.Graphics.setFullScreen(true);
+
+          $1S.IO.Input.attach($1S.IO.Input.EventTypes.KEY_UP,
+               this.id,
+               (event) => {
+                    this.keys[event.code] = false;
+                    return true;
+               });
+
+          $1S.IO.Input.attach($1S.IO.Input.EventTypes.KEY_DOWN,
+               this.id,
+               (event) => {
+                    this.keys[event.code] = true;
+                    return true;
+               });
+     }
+
+     onHideStage() {
+          $1S.IO.Input.release(this.id);
+
+          //$1S.Renderer.Graphics.setFullScreen(false);
+
+     }
+
+     onTick(timeStamp, deltaTime) {
+          this.lblScore.text = "Score: " + this.score.toString();
+
+          for (var i = this.asteroids.length - 1; i >= 0; i--) {
+
+               if (this.isOffScreen(this.asteroids[i].instance)) {
+                    if (this.asteroids[i].transited)
+                    {
+                         this.destroyProp(this.asteroids[i].id);
+                         this.asteroids.splice(i, 1);
+
+                         if (this.asteroids.length < this.densityFactor)
+                              this.createAsteroid(this.densityFactor - this.asteroids.length);
+                    }
+               }
+               else
+                    this.asteroids[i].transited = true;
+
+          }
+
+          const player = this.player;
+
+          if (player != null) {
+
+               //we only want to fire once on key release
+               if (!this.Entered)
+                    this.Entered = false;
+
+               // Handle player movement
+               if (this.keys['ArrowLeft'] != undefined) {
+                    player.moveLeft(this.keys['ArrowLeft']);
+               }
+               if (this.keys['ArrowRight'] != undefined) {
+                    player.moveRight(this.keys['ArrowRight']);
+               }
+               if (this.keys['KeyA'] != undefined || this.thrust) {
+                    player.forward(this.keys['KeyA']);
+               }
+               if (this.keys['KeyZ'] != undefined) {
+                    player.brake(this.keys['KeyZ']);
+               }
+               if (this.keys['Enter'] != undefined) {
+                    player.shoot(this.keys['Enter']);
+               }
+
+          }
+
+
+     }
+
+     onDraw(context) {
+          //blackness of space
+          context.fillStyle = 'black';
+          context.fillRect(0, 0, this.width, this.height);
+
+          //my god, its full of stars
+          context.fillStyle = 'white';
+          this.stars.forEach((star) => {
+               context.beginPath();
+               context.arc(star.x, star.y, star.size / 2, 0, 2 * Math.PI);
+               context.fill();
           });
 
-          window.addEventListener('keyup', (event) => {
-               this.keys[event.code] = false;
-          });
+     }
 
+     onDispose() {
+          $1S.IO.Input.release(this.id);
+     }
+
+     resetStage() {
+          this.stars = [];
+          this.starCount = 100;
+          this.asteroids = [];
+          this.score = 0;
+          this.hits = 0;
+          this.densityFactor = 1;
+          this.thrust = false;
      }
 
      newGame() {
@@ -166,71 +249,6 @@ class Game extends $1S.Renderer.Type.StageType {
           $1S.Audio.stopAll();
 
           $1S.Application.get().stageEventHandler("exit", this);
-     }
-
-     onTick(timeStamp, deltaTime) {
-          this.lblScore.text = "Score: " + this.score.toString();
-
-          for (var i = this.asteroids.length - 1; i >= 0; i--) {
-
-               if (this.isOffScreen(this.asteroids[i].instance)) {
-                    if (this.asteroids[i].transited)
-                    {
-                         this.destroyProp(this.asteroids[i].id);
-                         this.asteroids.splice(i, 1);
-
-                         if (this.asteroids.length < this.densityFactor)
-                              this.createAsteroid(this.densityFactor - this.asteroids.length);
-                    }
-               }
-               else
-                    this.asteroids[i].transited = true;
-
-          }
-
-          const player = this.player;
-
-          if (player != null) {
-
-               //we only want to fire once on key release
-               if (!this.Entered)
-                    this.Entered = false;
-
-               // Handle player movement
-               if (this.keys['ArrowLeft'] != undefined) {
-                    player.moveLeft(this.keys['ArrowLeft']);
-               }
-               if (this.keys['ArrowRight'] != undefined) {
-                    player.moveRight(this.keys['ArrowRight']);
-               }
-               if (this.keys['KeyA'] != undefined) {
-                    player.forward(this.keys['KeyA']);
-               }
-               if (this.keys['KeyZ'] != undefined) {
-                    player.brake(this.keys['KeyZ']);
-               }
-               if (this.keys['Enter'] != undefined) {
-                    player.shoot(this.keys['Enter']);
-               }
-
-          }
-
-
-     }
-
-     onDraw(context) {
-          //blackness of space
-          context.fillStyle = 'black';
-          context.fillRect(0, 0, this.width, this.height);
-
-          //my god, its full of stars
-          context.fillStyle = 'white';
-          this.stars.forEach((star) => {
-               context.beginPath();
-               context.arc(star.x, star.y, star.size / 2, 0, 2 * Math.PI);
-               context.fill();
-          });
-
      }
 
 }

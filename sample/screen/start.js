@@ -7,11 +7,6 @@
           this.centerX = this.width / 2;
           this.centerY = this.height / 2;
 
-          this.initializeControls();
-     }
-
-     initializeControls() {
-
           //create the starfield
           this.createStarField();
 
@@ -29,7 +24,6 @@
                     textColor: "white",
                     text: "Asteroid Blaster"
                });
-
 
           this.lblCredit = new $1S.UI.Controls.Label(
                {
@@ -59,27 +53,7 @@
           this.registerProp(this.lblTitle, {}, 10000);
           this.registerProp(this.lblCredit, {}, 10000);
           this.registerProp(btn, {}, 10000);
-     }
 
-     startButtonClick(e) {
-          $1S.Application.get().stageEventHandler("start", this);
-     }
-
-     createStarField() {
-          for (let i = 0; i < this.starCount; i++) {
-               this.addStar();
-          }
-     }
-
-     addStar() {
-          const angle = Math.random() * Math.PI * 2;
-          const distance = Math.random() * 50; // Start near the center
-          const x = this.centerX + Math.cos(angle) * distance;
-          const y = this.centerY + Math.sin(angle) * distance;
-          var speed = 0.005 + Math.random();
-          if (speed > 0.5) speed = 0.5;
-          const size = 1 + Math.random() * 3;
-          this.stars.push({ x, y, speed, size, angle, distance });
      }
 
      onTick(timeStamp, deltaTime) {
@@ -112,6 +86,28 @@
      onDispose() {
           this.stars = [];
      }
+
+     startButtonClick(e) {
+          $1S.Application.get().stageEventHandler("start", this);
+     }
+
+     createStarField() {
+          for (let i = 0; i < this.starCount; i++) {
+               this.addStar();
+          }
+     }
+
+     addStar() {
+          const angle = Math.random() * Math.PI * 2;
+          const distance = Math.random() * 50; // Start near the center
+          const x = this.centerX + Math.cos(angle) * distance;
+          const y = this.centerY + Math.sin(angle) * distance;
+          var speed = 0.005 + Math.random();
+          if (speed > 0.5) speed = 0.5;
+          const size = 1 + Math.random() * 3;
+          this.stars.push({ x, y, speed, size, angle, distance });
+     }
+
 }
 
 $1S.registerType(Start, "Start");
