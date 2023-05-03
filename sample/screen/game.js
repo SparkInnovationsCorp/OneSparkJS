@@ -42,9 +42,27 @@ class Game extends $1S.Renderer.Type.StageType {
                     takesCollisions: true
                });
 
-          this.registerProp(this.lblScore, {}, 10000);
-          this.registerProp(this.exitButton, {}, 10000);
+          //this is controlled by the physics engine
           this.registerProp(this.player, {}, 100);
+
+          const AnchorTransform = $1S.Renderer.Type.Transforms.AnchorTransform;
+          const AnchorType = $1S.Renderer.Type.Transforms.AnchorType;
+
+          this.registerProp(new AnchorTransform(this, this.lblScore,
+               {
+                    anchorLeft: AnchorType.Absolute,
+                    anchorLeftValue: 20,
+                    anchorTop: AnchorType.Absolute,
+                    anchorTopValue: 20
+               }), {}, 10000);
+
+          this.registerProp(new AnchorTransform(this, this.exitButton,
+               {
+                    anchorRight: AnchorType.Absolute,
+                    anchorRightValue: 20,
+                    anchorTop: AnchorType.Absolute,
+                    anchorTopValue: 20
+               }), {}, 10000);
 
      }
 

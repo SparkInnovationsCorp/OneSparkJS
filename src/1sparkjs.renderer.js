@@ -35,6 +35,167 @@
                }
           }
 
+          const AnchorTypeEnum = {
+               None: 0,
+               Absolute: 1,
+               Relative: 2,
+               Centered: 3
+          };
+
+          class TransformType {
+
+               constructor(parent, child, properties) {
+                    this.parent = parent;
+
+                    this.child = child;
+                    this.childRegion = this.child.getRegion();
+
+                    if (this.onInit) this.onInit(properties);
+               }
+
+               raiseTickEvent(timeStamp, deltaTime) {
+
+                    if (this.onTick)
+                         this.onTick(timeStamp, deltaTime);
+
+                    this.child.raiseTickEvent(timeStamp, deltaTime);
+               }
+
+               raiseRenderEvent(context) {
+                    this.child.raiseRenderEvent(context);
+               }
+
+               raiseResizeEvent(w, h) {
+
+                    if (this.onResize)
+                         this.onResize(w, h);
+
+                    this.child.raiseRenderEvent(w, h);
+               }
+
+               raiseDisposeEvent() {
+                    this.child.raiseDisposeEvent();
+               }
+
+               raiseShowStageEvent() {
+                    this.child.raiseShowStageEvent();
+               }
+
+               raiseHideStageEvent() {
+                    this.child.raiseHideStageEvent();
+               }
+
+          }
+
+          class AnchorTransformType extends TransformType {
+
+               onInit(properties) {
+                    this.anchorLeft = properties.anchorLeft || AnchorTypeEnum.None;
+                    this.anchorLeftValue = properties.anchorLeftValue || 0;
+                    this.anchorRight = properties.anchorRight || AnchorTypeEnum.None;
+                    this.anchorRightValue = properties.anchorRightValue || 0;
+                    this.anchorTop = properties.anchorTop || AnchorTypeEnum.None;
+                    this.anchorTopValue = properties.anchorTopValue || 0;
+                    this.anchorBottom = properties.anchorBottom || AnchorTypeEnum.None;
+                    this.anchorBottomValue = properties.anchorBottomValue || 0;
+
+                    console.log(properties);
+
+                    this.updateRegion();
+               }
+
+               onResize() {
+                    this.updateRegion(); 
+               }
+
+               updateRegion() {
+                    //left
+                    if (this.anchorLeft == AnchorTypeEnum.Absolute) {
+                         this.childRegion.x1 = this.anchorLeftValue;
+
+                         if (this.anchorRight == AnchorTypeEnum.None)
+                              this.childRegion.x2 = this.childRegion.x1 + this.child.width;
+                    }
+                    else if (this.anchorLeft == AnchorTypeEnum.Relative) {
+                         this.childRegion.x1 = this.parent.width * (this.anchorLeftValue / 100);
+
+                         if (this.anchorRight == AnchorTypeEnum.None)
+                              this.childRegion.x2 = this.childRegion.x1 + this.child.width;
+                    }
+                    else if (this.anchorLeft == AnchorTypeEnum.Centered) {
+                         this.childRegion.x1 = ((this.parent.width / 2) - (this.child.width / 2)) - this.anchorLeftValue;
+
+                         if (this.anchorRight == AnchorTypeEnum.None)
+                              this.childRegion.x2 = this.childRegion.x1 + this.child.width;
+                    }
+
+                    //right
+                    if (this.anchorRight == AnchorTypeEnum.Absolute) {
+                         this.childRegion.x2 = this.parent.width - this.anchorRightValue;
+
+                         if (this.anchorLeft == AnchorTypeEnum.None)
+                              this.childRegion.x1 = this.childRegion.x2 - this.child.width;
+                    }
+                    else if (this.anchorRight == AnchorTypeEnum.Relative) {
+                         this.childRegion.x2 = this.parent.width - (this.parent.width * (this.anchorRightValue / 100));
+
+                         if (this.anchorLeft == AnchorTypeEnum.None)
+                              this.childRegion.x1 = this.childRegion.x2 - this.child.width;
+                    }
+                    else if (this.anchorRight == AnchorTypeEnum.Centered) {
+                         this.childRegion.x2 = (this.parent.width - ((this.parent.width / 2) - (this.child.width / 2))) + this.anchorRightValue;
+
+                         if (this.anchorLeft == AnchorTypeEnum.None)
+                              this.childRegion.x1 = this.childRegion.x2 - this.child.width;
+                    }
+
+                    //top
+                    if (this.anchorTop == AnchorTypeEnum.Absolute) {
+
+                         console.log("hit here");
+
+                         this.childRegion.y1 = this.anchorTopValue;
+                         if (this.anchorBottom == AnchorTypeEnum.None) {
+                              this.childRegion.y2 = this.childRegion.y1 + this.child.height;
+                         }
+                    } else if (this.anchorTop == AnchorTypeEnum.Relative) {
+                         this.childRegion.y1 = this.parent.height * (this.anchorTopValue / 100);
+                         if (this.anchorBottom == AnchorTypeEnum.None) {
+                              this.childRegion.y2 = this.childRegion.y1 + this.child.height;
+                         }
+                    } else if (this.anchorTop == AnchorTypeEnum.Centered) {
+                         this.childRegion.y1 = ((this.parent.height / 2) - (this.child.height / 2)) - this.anchorTopValue;
+                         if (this.anchorBottom == AnchorTypeEnum.None) {
+                              this.childRegion.y2 = this.childRegion.y1 + this.child.height;
+                         }
+                    }
+
+                    //bottom
+                    if (this.anchorBottom == AnchorTypeEnum.Absolute) {
+                         this.childRegion.y2 = this.parent.height - this.anchorBottomValue;
+                         if (this.anchorTop == AnchorTypeEnum.None) {
+                              this.childRegion.y1 = this.childRegion.y2 - this.child.height;
+                         }
+                    } else if (this.anchorBottom == AnchorTypeEnum.Relative) {
+                         this.childRegion.y2 = this.parent.height - (this.parent.height * (this.anchorBottomValue / 100));
+                         if (this.anchorTop == AnchorTypeEnum.None) {
+                              this.childRegion.y1 = this.childRegion.y2 - this.child.height;
+                         }
+                    } else if (this.anchorBottom == AnchorTypeEnum.Centered) {
+                         this.childRegion.y2 = (this.parent.height - ((this.parent.height / 2) - (this.child.height / 2))) + this.anchorBottomValue;
+                         if (this.anchorTop == AnchorTypeEnum.None) {
+                              this.childRegion.y1 = this.childRegion.y2 - this.child.height;
+                         }
+                    }
+
+                    this.child.setRegion(this.childRegion);
+
+                    console.log(this.childRegion, this.child);
+               }
+
+
+          }
+
           class RenderableType {
 
                constructor(properties = {}) {
@@ -59,8 +220,8 @@
 
                registerProp = (instance, properties = {}, priority = 100000) => {
 
-                    if (!(instance instanceof StagePropType))
-                         throw new Error("Not a StagePropType component.");
+                    if ((!(instance instanceof StagePropType)) && !(instance instanceof TransformType))
+                         throw new Error("Not a StagePropType or TransformType component.");
 
                     const newRegistration = {
                          Instance: instance,
@@ -259,6 +420,38 @@
                               break;
                          default:
                               return { x1: this.x, y1: this.y, x2: this.x + this.width, y2: this.y + this.height };
+                              break;
+                    }
+               }
+
+               setRegion(region) {
+                    this.width = Math.abs(region.x2 - region.x1);
+                    this.height = Math.abs(region.y2 - region.y1);
+
+                    switch (this.alignOn) {
+                         case AlignOnEnum.Center:
+                              this.x = (region.x1 + region.x2) / 2;
+                              this.y = (region.y1 + region.y2) / 2;
+                              break;
+                         case AlignOnEnum.UpperLeft:
+                              this.x = region.x1;
+                              this.y = region.y1;
+                              break;
+                         case AlignOnEnum.UpperRight:
+                              this.x = region.x2;
+                              this.y = region.y1;
+                              break;
+                         case AlignOnEnum.LowerLeft:
+                              this.x = region.x1;
+                              this.y = region.y2;
+                              break;
+                         case AlignOnEnum.LowerRight:
+                              this.x = region.x2;
+                              this.y = region.y2;
+                              break;
+                         default:
+                              this.x = region.x1;
+                              this.y = region.y1;
                               break;
                     }
                }
@@ -668,7 +861,7 @@
 
           const Ext = new Extension();
 
-          return { AlignOnEnum, StageType, SortByEnum, SortByTypes, StagePropType, SpritePropType, TilesetPropType, Ext }
+          return { AlignOnEnum, StageType, SortByEnum, SortByTypes, StagePropType, SpritePropType, TilesetPropType, AnchorTypeEnum, AnchorTransformType, Ext }
      })();
 
      // Graphics module
@@ -821,7 +1014,11 @@
                StageType: OneSparkJs.Renderer.StageType,
                StagePropType: OneSparkJs.Renderer.StagePropType,
                SpriteType: OneSparkJs.Renderer.SpritePropType,
-               TilesetType: OneSparkJs.Renderer.TilesetPropType
+               TilesetType: OneSparkJs.Renderer.TilesetPropType,
+               Transforms: {
+                    AnchorType: OneSparkJs.Renderer.AnchorTypeEnum,
+                    AnchorTransform: OneSparkJs.Renderer.AnchorTransformType
+               }
           },
           Graphics: {
                setState: OneSparkJs.Graphics.setState,

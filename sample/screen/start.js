@@ -10,12 +10,8 @@
           //create the starfield
           this.createStarField();
 
-          const yStart = ((this.height - 140) / 2) + 20;
-
           this.lblTitle = new $1S.UI.Controls.Label(
                {
-                    x: this.width / 2,
-                    y: yStart,
                     width: this.width,
                     height: 40,
                     fontFamily: '"Press Start 2P"',
@@ -27,8 +23,6 @@
 
           this.lblCredit = new $1S.UI.Controls.Label(
                {
-                    x: this.width / 2,
-                    y: yStart + 50,
                     width: this.width,
                     height: 20,
                     fontSize: 16,
@@ -39,8 +33,6 @@
 
           var btn = new $1S.UI.Controls.Button(
                {
-                    x: this.width / 2,
-                    y: yStart + 100,
                     fontSize: 16,
                     width: 200,
                     height: 40,
@@ -50,9 +42,31 @@
                     onClick: this.startButtonClick.bind(this)
                });
 
-          this.registerProp(this.lblTitle, {}, 10000);
-          this.registerProp(this.lblCredit, {}, 10000);
-          this.registerProp(btn, {}, 10000);
+          const AnchorTransform = $1S.Renderer.Type.Transforms.AnchorTransform;
+          const AnchorType = $1S.Renderer.Type.Transforms.AnchorType;
+
+          this.registerProp(new AnchorTransform(this, this.lblTitle,
+               {
+                    anchorLeft: AnchorType.Centered,
+                    anchorRight: AnchorType.Centered,
+                    anchorTop: AnchorType.Centered,
+                    anchorTopValue: 50
+               }), {}, 10000);
+
+          this.registerProp(new AnchorTransform(this, this.lblCredit,
+               {
+                    anchorLeft: AnchorType.Centered,
+                    anchorRight: AnchorType.Centered,
+                    anchorTop: AnchorType.Centered,
+               }), {}, 10000);
+
+          this.registerProp(new AnchorTransform(this, btn,
+               {
+                    anchorLeft: AnchorType.Centered,
+                    anchorRight: AnchorType.Centered,
+                    anchorBottom: AnchorType.Centered,
+                    anchorBottomValue: 50
+               }), {}, 10000);
 
      }
 
