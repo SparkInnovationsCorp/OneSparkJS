@@ -62,7 +62,7 @@ class Demo extends $1S.Renderer.Type.StageType {
 
      toggleAudio(e) {
           this.audioOn = !this.audioOn;
-          console.log("tick");
+
           if (this.audioOn)
                $1S.Audio.play("steps", true);
           else

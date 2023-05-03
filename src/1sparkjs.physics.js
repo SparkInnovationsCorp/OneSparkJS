@@ -395,8 +395,6 @@
                onTick(timeStamp, deltaTime) {
                     var stage = $1S.Renderer.get();
 
-                    console.log(stage);
-
                     var stageObjects = stage.Instance.stageProps;
 
                     for (var i = 0; i < stageObjects.length; i++) {

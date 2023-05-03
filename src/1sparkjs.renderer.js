@@ -45,6 +45,8 @@
           class TransformType {
 
                constructor(parent, child, properties) {
+                    this.id = $1S.Helper.newId();
+
                     this.parent = parent;
 
                     this.child = child;
@@ -99,8 +101,6 @@
                     this.anchorBottom = properties.anchorBottom || AnchorTypeEnum.None;
                     this.anchorBottomValue = properties.anchorBottomValue || 0;
 
-                    console.log(properties);
-
                     this.updateRegion();
                }
 
@@ -152,8 +152,6 @@
                     //top
                     if (this.anchorTop == AnchorTypeEnum.Absolute) {
 
-                         console.log("hit here");
-
                          this.childRegion.y1 = this.anchorTopValue;
                          if (this.anchorBottom == AnchorTypeEnum.None) {
                               this.childRegion.y2 = this.childRegion.y1 + this.child.height;
@@ -188,9 +186,8 @@
                          }
                     }
 
-                    this.child.setRegion(this.childRegion);
+                    this.child.setRegion(this.childRegion); 
 
-                    console.log(this.childRegion, this.child);
                }
 
 

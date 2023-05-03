@@ -75,8 +75,6 @@ class Ship extends $1S.Physics.Types.PhysicsBoundType {
                if (!this.shot) {
                     this.shot = true;
 
-                    console.log(this);
-
                     $1S.Audio.play("laser");
 
                     this.stage = $1S.Renderer.get();
