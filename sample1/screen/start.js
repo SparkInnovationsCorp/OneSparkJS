@@ -1,4 +1,4 @@
-﻿class Start extends $1S.Renderer.Type.StageType {
+﻿class Start extends $1S.Renderer.Type.Stage {
 
      onInit(properties) {
           this.stars = [];
@@ -42,8 +42,8 @@
                     onClick: this.startButtonClick.bind(this)
                });
 
-          const AnchorTransform = $1S.Renderer.Type.Transforms.AnchorTransform;
-          const AnchorType = $1S.Renderer.Type.Transforms.AnchorType;
+          const AnchorType = $1S.Renderer.Type.Render2D.Transform.AnchorType;
+          const AnchorTransform = $1S.Renderer.Type.Render2D.Transform.AnchorTransform;
 
           this.registerProp(new AnchorTransform(this, this.lblTitle,
                {

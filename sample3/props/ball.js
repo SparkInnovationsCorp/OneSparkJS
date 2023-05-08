@@ -1,4 +1,4 @@
-﻿class Ball extends $1S.Physics.Types.PhysicsBoundType {
+﻿class Ball extends $1S.Physics.Type.PhysicsBound {
 
      onInit(properties) {
           this.color = properties.color || "gray";

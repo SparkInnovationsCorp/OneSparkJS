@@ -1,5 +1,7 @@
 ﻿((global) => {
 
+     //right now physics assumes a centered alignment with a x/y scale = 1
+
      const OneSparkJs = {};
 
      OneSparkJs.Debug = true;
@@ -9,8 +11,8 @@
           class PhysicsModifierType {
                constructor(target, properties = {}) {
 
-                    if (!(target instanceof PhysicsBoundType))
-                         throw new Error("No PhysicsBoundType target provided.");
+                    if (!(target instanceof PhysicsBound))
+                         throw new Error("No PhysicsBound target provided.");
 
                     this.id = $1S.Helper.newId();
 
@@ -27,8 +29,8 @@
           class CollisionModifierType {
                constructor(target, properties) {
 
-                    if (!(target instanceof PhysicsBoundType))
-                         throw new Error("No PhysicsBoundType target provided.");
+                    if (!(target instanceof PhysicsBound))
+                         throw new Error("No PhysicsBound target provided.");
 
                     this.id = $1S.Helper.newId();
 
@@ -42,7 +44,7 @@
                }
           }
 
-          class PhysicsBoundType extends $1S.Renderer.Type.StagePropType {
+          class PhysicsBound extends $1S.Renderer.Type.Render2D.Prop {
                constructor(properties = {}) {
                     super(properties, true);
 
@@ -69,7 +71,7 @@
                          throw new Error("Not a PhysicsModifierType component.");
 
                     this.physicsModifiers.push({
-                         Instance: instance,
+                         instance: instance,
                          Priority: priority
                     });
 
@@ -79,10 +81,10 @@
 
                getPhysicsModifier = (id) => {
 
-                    const subPhysicsModifiersObj = this.physicsModifiers.find(prop => prop.Instance.id === id);
+                    const subPhysicsModifiersObj = this.physicsModifiers.find(prop => prop.instance.id === id);
 
                     if (subPhysicsModifiersObj) {
-                         return subPhysicsModifiersObj.Instance;
+                         return subPhysicsModifiersObj.instance;
                     }
 
                     return null;
@@ -90,7 +92,7 @@
 
                destroyPhysicsModifier = (id) => {
 
-                    const index = this.physicsModifiers.findIndex(prop => prop.Instance.id === id);
+                    const index = this.physicsModifiers.findIndex(prop => prop.instance.id === id);
 
                     if (index !== -1) {
                          if (this.physicsModifiers[i].onDestroy)
@@ -116,7 +118,7 @@
                          throw new Error("Not a CollisionModifierType component.");
 
                     this.collisionModifiers.push({
-                         Instance: instance,
+                         instance: instance,
                          Priority: priority
                     });
 
@@ -126,10 +128,10 @@
 
                getCollisionModifier = (id) => {
 
-                    const subCollisionModifiersObj = this.collisionModifiers.find(prop => prop.Instance.id === id);
+                    const subCollisionModifiersObj = this.collisionModifiers.find(prop => prop.instance.id === id);
 
                     if (subCollisionModifiersObj) {
-                         return subCollisionModifiersObj.Instance;
+                         return subCollisionModifiersObj.instance;
                     }
 
                     return null;
@@ -137,7 +139,7 @@
 
                destroyCollisionModifier = (id) => {
 
-                    const index = this.collisionModifiers.findIndex(prop => prop.Instance.id === id);
+                    const index = this.collisionModifiers.findIndex(prop => prop.instance.id === id);
 
                     if (index !== -1) {
                          if (this.collisionModifiers[i].onDestroy)
@@ -162,12 +164,12 @@
                     super.raiseTickEvent(timeStamp, deltaTime);
 
                     for (var i = 0; i < this.physicsModifiers.length; i++)
-                         this.physicsModifiers[i].Instance.onTick(timeStamp, deltaTime);
+                         this.physicsModifiers[i].instance.onTick(timeStamp, deltaTime);
 
                     // update position based on velocity
-                    this.x += this.vectorX * deltaTime;
-                    this.y += this.vectorY * deltaTime;
-                    this.rotation += this.rotationSpeed * deltaTime;
+                    this.orientation.x += this.vectorX * deltaTime;
+                    this.orientation.y += this.vectorY * deltaTime;
+                    this.orientation.rotation += this.rotationSpeed * deltaTime;
                }
 
                raiseResizeEvent = (w, h) => {
@@ -175,7 +177,7 @@
 
                     for (var i = 0; i < this.physicsModifiers.length; i++)
                          if (this.physicsModifiers[i].onResize)
-                              this.physicsModifiers[i].Instance.onResize(w, h);
+                              this.physicsModifiers[i].instance.onResize(w, h);
 
                }
 
@@ -189,12 +191,12 @@
                     this.rotationSpeed2 = this.rotationSpeed;
 
                     for (var i = 0; i < this.collisionModifiers.length; i++)
-                         this.collisionModifiers[i].Instance.onCollision(collisionObjects);
+                         this.collisionModifiers[i].instance.onCollision(collisionObjects);
 
                     //inform sub objects
                     for (var i = 0; i < this.stageProps.length; i++)
-                         if (this.stageProps[i].Instance.raiseCollisionEvent)
-                              this.stageProps[i].Instance.raiseCollisionEvent(collisionObjects);
+                         if (this.stageProps[i].instance.raiseCollisionEvent)
+                              this.stageProps[i].instance.raiseCollisionEvent(collisionObjects);
                }
 
                raiseCollisionCommitEvent() {
@@ -204,23 +206,23 @@
 
                     //inform sub objects
                     for (var i = 0; i < this.stageProps.length; i++)
-                         if (stageProps[i].Instance.raiseCollisionCommitEvent)
-                              this.stageProps[i].Instance.raiseCollisionCommitEvent(collisionObjects);
+                         if (stageProps[i].instance.raiseCollisionCommitEvent)
+                              this.stageProps[i].instance.raiseCollisionCommitEvent(collisionObjects);
                }
 
                raiseRenderEvent(context = null) {
 
                     if (OneSparkJs.Debug) {
                          if (this.collisionBorder) {
-                              const shape = $1S.Physics.Collisions.getAbsoluteBorder(this.x, this.y, this.collisionBorder);
+                              const shape = $1S.Physics.Collisions.getAbsoluteBorder(this.orientation.x, this.orientation.y, this.collisionBorder);
                               context.strokeStyle = 'red'; // Set the stroke color to red
                               context.lineWidth = 1; // Set the line width to 1 pixel
 
                               // Begin drawing the hexagon shape
                               context.beginPath();
-                              context.moveTo(shape[0].x, shape[0].y); // Move to the first vertex
+                              context.moveTo(shape[0].orientation.x, shape[0].orientation.y); // Move to the first vertex
                               for (let i = 1; i < shape.length; i++) {
-                                   context.lineTo(shape[i].x, shape[i].y); // Draw a line to each subsequent vertex
+                                   context.lineTo(shape[i].orientation.x, shape[i].orientation.y); // Draw a line to each subsequent vertex
                               }
                               context.closePath(); // Close the path
                               context.stroke(); // Draw the stroke
@@ -316,13 +318,13 @@
                          if (this.thrusts.right) this.target.vectorX += deltaAcc;
 
                          if (this.thrusts.forward) {
-                              const angle = this.target.rotation * (Math.PI / 180);
+                              const angle = this.target.orientation.rotation * (Math.PI / 180);
                               this.target.vectorX += deltaAcc * Math.cos(angle);
                               this.target.vectorY += deltaAcc * Math.sin(angle);
                          }
 
                          if (this.thrusts.backward) {
-                              const angle = this.target.rotation * (Math.PI / 180);
+                              const angle = this.target.orientation.rotation * (Math.PI / 180);
                               this.target.vectorX -= (deltaAcc * Math.cos(angle));
                               this.target.vectorY -= (deltaAcc * Math.sin(angle));
                          }
@@ -395,22 +397,22 @@
                onTick(timeStamp, deltaTime) {
                     var stage = $1S.Renderer.get();
 
-                    var stageObjects = stage.Instance.stageProps;
+                    var stageObjects = stage.instance.stageProps;
 
                     for (var i = 0; i < stageObjects.length; i++) {
-                         var stageObject = stageObjects[i].Instance;
+                         var stageObject = stageObjects[i].instance;
 
-                         if (stageObject instanceof PhysicsBoundType) {
+                         if (stageObject instanceof PhysicsBound) {
 
                               var mass = stageObject.mass;
-                              var x = stageObject.x;
-                              var y = stageObject.y;
+                              var x = stageObject.orientation.x;
+                              var y = stageObject.orientation.y;
 
                               if (stageObject.id !== this.target.id) {
 
                                    // calculate distance between target and stage object
-                                   var distX = x - this.target.x;
-                                   var distY = y - this.target.y;
+                                   var distX = x - this.target.orientation.x;
+                                   var distY = y - this.target.orientation.y;
                                    var distance = Math.sqrt(distX * distX + distY * distY);
 
                                    if (distance != 0) {
@@ -441,20 +443,20 @@
 
                onTick(timeStamp, deltaTime) {
                     // check if the target object has hit the left or right side of the canvas
-                    if (this.target.x - this.target.width / 2 < 0) {
-                         this.target.x = this.target.width / 2;
+                    if (this.target.orientation.x - this.target.width / 2 < 0) {
+                         this.target.orientation.x = this.target.width / 2;
                          this.target.vectorX = -this.target.vectorX;
-                    } else if (this.target.x + this.target.width / 2 > this.width) {
-                         this.target.x = this.width - this.target.width / 2;
+                    } else if (this.target.orientation.x + this.target.width / 2 > this.width) {
+                         this.target.orientation.x = this.width - this.target.width / 2;
                          this.target.vectorX = -this.target.vectorX;
                     }
 
                     // check if the target object has hit the top or bottom of the canvas
-                    if (this.target.y - this.target.height / 2 < 0) {
-                         this.target.y = this.target.height / 2;
+                    if (this.target.orientation.y - this.target.height / 2 < 0) {
+                         this.target.orientation.y = this.target.height / 2;
                          this.target.vectorY = -this.target.vectorY;
-                    } else if (this.target.y + this.target.height / 2 > this.height) {
-                         this.target.y = this.height - this.target.height / 2;
+                    } else if (this.target.orientation.y + this.target.height / 2 > this.height) {
+                         this.target.orientation.y = this.height - this.target.height / 2;
                          this.target.vectorY = -this.target.vectorY + this.bounceReduction;
                          if (this.target.vectorY > 0) this.target.vectorY = 0;
                     }
@@ -469,16 +471,16 @@
                }
 
                onTick(timeStamp, deltaTime) {
-                    if (this.target.x < -this.target.width / 2) {
-                         this.target.x = this.width + this.target.width / 2;
-                    } else if (this.target.x > this.width + this.target.width / 2) {
-                         this.target.x = -this.target.width / 2;
+                    if (this.target.orientation.x < -this.target.width / 2) {
+                         this.target.orientation.x = this.width + this.target.width / 2;
+                    } else if (this.target.orientation.x > this.width + this.target.width / 2) {
+                         this.target.orientation.x = -this.target.width / 2;
                     }
 
-                    if (this.target.y < -this.target.height / 2) {
-                         this.target.y = this.height + this.target.height / 2;
-                    } else if (this.target.y > this.height + this.target.height / 2) {
-                         this.target.y = -this.target.height / 2;
+                    if (this.target.orientation.y < -this.target.height / 2) {
+                         this.target.orientation.y = this.height + this.target.height / 2;
+                    } else if (this.target.orientation.y > this.height + this.target.height / 2) {
+                         this.target.orientation.y = -this.target.height / 2;
                     }
                }
           }
@@ -497,7 +499,7 @@
                          const currentAngle = targetAngle * 180 / Math.PI;
 
                          this.target.rotationSpeed = 0;
-                         this.target.rotation = currentAngle;
+                         this.target.orientation.rotation = currentAngle;
                     }
                }
           }
@@ -548,31 +550,31 @@
                     var pendingCommits = [];
 
                     // Find objects that give and take collisions
-                    const givesCollisions = stage.Instance.stageProps.filter(prop => prop.Instance instanceof $1S.Physics.Types.PhysicsBoundType && prop.Instance.givesCollisions);
-                    const takesCollisions = stage.Instance.stageProps.filter(prop => prop.Instance instanceof $1S.Physics.Types.PhysicsBoundType && prop.Instance.takesCollisions);
+                    const givesCollisions = stage.instance.stageProps.filter(prop => prop.instance instanceof $1S.Physics.Type.PhysicsBound && prop.instance.givesCollisions);
+                    const takesCollisions = stage.instance.stageProps.filter(prop => prop.instance instanceof $1S.Physics.Type.PhysicsBound && prop.instance.takesCollisions);
 
                     // Check for collisions
                     for (const takes of takesCollisions) {
 
-                         const takesBorder = this.getAbsoluteBorder(takes.Instance.x + (takes.Instance.width / 2), takes.Instance.y + (takes.Instance.height / 2), takes.Instance.collisionBorder);
+                         const takesBorder = this.getAbsoluteBorder(takes.instance.orientation.x + (takes.instance.width / 2), takes.instance.orientation.y + (takes.instance.height / 2), takes.instance.collisionBorder);
 
                          const collisions = givesCollisions
-                              .filter(gives => takes.Instance.id !== gives.Instance.id)
-                              .filter(gives => this.doPolygonsIntersect(takesBorder, this.getAbsoluteBorder(gives.Instance.x + (gives.Instance.width / 2), gives.Instance.y + (gives.Instance.height / 2), gives.Instance.collisionBorder)))
-                              .map(gives => gives.Instance);
+                              .filter(gives => takes.instance.id !== gives.instance.id)
+                              .filter(gives => this.doPolygonsIntersect(takesBorder, this.getAbsoluteBorder(gives.instance.orientation.x + (gives.instance.width / 2), gives.instance.orientation.y + (gives.instance.height / 2), gives.instance.collisionBorder)))
+                              .map(gives => gives.instance);
 
-                         const newCollisions = collisions.filter(collision => !takes.Instance.collisions.includes(collision.id));
+                         const newCollisions = collisions.filter(collision => !takes.instance.collisions.includes(collision.id));
 
-                         takes.Instance.collisions = [...new Set([...takes.Instance.collisions.filter(collisionId => collisions.some(collision => collision.id === collisionId)), ...collisions.map(collision => collision.id)])];
+                         takes.instance.collisions = [...new Set([...takes.instance.collisions.filter(collisionId => collisions.some(collision => collision.id === collisionId)), ...collisions.map(collision => collision.id)])];
 
                          if (newCollisions.length > 0) {
                               pendingCommits.push(takes);
-                              takes.Instance.raiseCollisionEvent(newCollisions);
+                              takes.instance.raiseCollisionEvent(newCollisions);
                          }
                     }
 
                     for (const pending of pendingCommits) {
-                         pending.Instance.raiseCollisionCommitEvent();
+                         pending.instance.raiseCollisionCommitEvent();
                     }
 
                }
@@ -672,7 +674,7 @@
           const Ext = new Extension();
 
           return {
-               PhysicsBoundType,
+               PhysicsBound,
                ThrustModifer,
                EnvironmentalGravityModifier,
                GravitationalAttractionModifier,
@@ -687,8 +689,8 @@
 
      // Public API
      global.$1S.Physics = {
-          Types: {
-               PhysicsBoundType: OneSparkJs.Physics.PhysicsBoundType
+          Type: {
+               PhysicsBound: OneSparkJs.Physics.PhysicsBound
           },
           Motion: {
                Thrust: OneSparkJs.Physics.ThrustModifer,

@@ -2,19 +2,19 @@
      "audio": [
           {
                "name": "explosion",
-               "path": "/sample/assets/audio/explosion.mp3"
+               "path": "/sample1/assets/audio/explosion.mp3"
           },
           {
                "name": "laser",
-               "path": "/sample/assets/audio/laser.mp3"
+               "path": "/sample1/assets/audio/laser.mp3"
           },
           {
                "name": "rocket",
-               "path": "/sample/assets/audio/rocket-loop.wav"
+               "path": "/sample1/assets/audio/rocket-loop.wav"
           },
           {
                "name": "ambient space",
-               "path": "/sample/assets/audio/space.wav"
+               "path": "/sample1/assets/audio/space.wav"
           }
      ]
 }

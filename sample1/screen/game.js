@@ -1,7 +1,7 @@
 ﻿const Asteroid = await $1S.import("Asteroid", "../props/asteroid.js");
 const Ship = await $1S.import("Ship", "../props/ship.js");
 
-class Game extends $1S.Renderer.Type.StageType {
+class Game extends $1S.Renderer.Type.Stage {
 
      onInit(properties) {
           this.resetStage();
@@ -45,8 +45,8 @@ class Game extends $1S.Renderer.Type.StageType {
           //this is controlled by the physics engine
           this.registerProp(this.player, {}, 100);
 
-          const AnchorTransform = $1S.Renderer.Type.Transforms.AnchorTransform;
-          const AnchorType = $1S.Renderer.Type.Transforms.AnchorType;
+          const AnchorType = $1S.Renderer.Type.Render2D.Transform.AnchorType;
+          const AnchorTransform = $1S.Renderer.Type.Render2D.Transform.AnchorTransform;
 
           this.registerProp(new AnchorTransform(this, this.lblScore,
                {
@@ -69,7 +69,7 @@ class Game extends $1S.Renderer.Type.StageType {
      onShowStage() {
           this.keys = {};
 
-          //$1S.Renderer.Graphics.setFullScreen(true);
+          //$1S.Renderer.Canvas.setFullScreen(true);
 
           $1S.IO.Input.attach($1S.IO.Input.EventType.KEY_UP,
                this.id,
@@ -89,7 +89,7 @@ class Game extends $1S.Renderer.Type.StageType {
      onHideStage() {
           $1S.IO.Input.release(this.id);
 
-          //$1S.Renderer.Graphics.setFullScreen(false);
+          //$1S.Renderer.Canvas.setFullScreen(false);
 
      }
 
@@ -236,10 +236,10 @@ class Game extends $1S.Renderer.Type.StageType {
      isOffScreen(obj) {
 
           // Calculate the edges of the shape
-          const leftEdge = obj.x;
-          const rightEdge = obj.x + obj.width;
-          const topEdge = obj.y;
-          const bottomEdge = obj.y + obj.height;
+          const leftEdge = obj.orientation.x;
+          const rightEdge = obj.orientation.x + obj.width;
+          const topEdge = obj.orientation.y;
+          const bottomEdge = obj.orientation.y + obj.height;
 
           // Check if any of the edges are outside the canvas bounds
           const isOffLeft = rightEdge < 0;

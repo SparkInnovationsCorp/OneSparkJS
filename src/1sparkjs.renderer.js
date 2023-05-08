@@ -5,43 +5,889 @@
      //Rederer module
      OneSparkJs.Renderer = (() => {
 
-          const AlignOnEnum = {
-               Center: 0,
-               UpperLeft: 1,
-               UpperRight: 2,
-               LowerLeft: 3,
-               LowerRight: 4
+          class Vertex {
+               constructor(x = 0, y = 0, z = 0) {
+                    this.x = x;
+                    this.y = y;
+                    this.z = z;
+               }
           }
 
+          //Renderable types
           const SortByEnum = {
-               ByPriority: 0,
-               ByDepth: 1
+               byPriority: 0,
+               byDepth: 1
           }
 
           const SortByTypes = {
-               ByPriority: {
+               byPriority: {
                     sortOnRegister: true,
                     sortOnRender: false,
-                    compare: function(a, b){
+                    compare: function (a, b) {
                          return a.Priority - b.Priority;
                     }
                },
-               ByDepth: {
+               byDepth: {
                     sortOnRegister: true,
                     sortOnRender: true,
-                    compare: function(a, b) {
-                         return a.Instance.z - b.Instance.z;
+                    compare: function (a, b) {
+                         return a.instance.orientation.z - b.instance.orientation.z;
                     }
                }
           }
 
-          const AnchorTypeEnum = {
-               None: 0,
-               Absolute: 1,
-               Relative: 2,
-               Centered: 3
-          };
+          class RenderableType {
 
+               constructor(properties = {}) {
+                    this.id = $1S.Helper.newId();
+                    this.stageProps = [];  //sub props
+
+                    if (this.sortBy)
+                         this.setRenderSort(this.sortBy);
+                    else
+                         this.setRenderSort(SortByEnum.byPriority);
+               }
+
+               setRenderSort = (sortByEnum) => {
+
+                    if (sortByEnum == SortByEnum.byPriority) {
+                         this.sortBy = OneSparkJs.Renderer.SortByTypes.byPriority;
+                    }
+                    if (sortByEnum == SortByEnum.byDepth) {
+                         this.sortBy = OneSparkJs.Renderer.SortByTypes.byDepth;
+                    }
+               }
+
+               registerProp = (instance, properties = {}, priority = 100000) => {
+
+                    if ((!(instance instanceof OneSparkJs.Renderer2D.StagePropType)) && !(instance instanceof OneSparkJs.Renderer2D.TransformType))
+                         throw new Error("Not a StagePropType or TransformType component.");
+
+                    const newRegistration = {
+                         instance: instance,
+                         Properties: properties,
+                         Priority: priority
+                    };
+
+                    this.stageProps.push(newRegistration);
+
+                    if (this.sortBy.sortOnRegister) {
+                         this.stageProps.sort(this.sortBy.compare);
+                    }
+
+                    return this.registerProp;
+               }
+
+               getProp = (id) => {
+
+                    const subPropsObj = this.stageProps.find(prop => prop.instance.id === id);
+
+                    if (subPropsObj) {
+                         return subPropsObj.instance;
+                    }
+
+                    return null;
+               }
+
+               destroyProp = (id) => {
+
+                    const index = this.stageProps.findIndex(prop => prop.instance.id === id);
+
+                    if (index !== -1) {
+                         if (this.stageProps[index].onDestroy)
+                              this.stageProps[index].onDestroy();
+
+                         this.stageProps.splice(index, 1);
+                         return true;
+                    }
+
+                    return false;
+               }
+
+               clearProps = () => {
+                    for (var i = 0; i < this.stageProps.length; i++)
+                         if (this.stageProps[i].onDestroy)
+                              this.stageProps[i].onDestroy();
+
+                    this.stageProps[i] = [];
+               }
+
+               raiseTickEvent (timeStamp, deltaTime) {
+
+                    if (this.onTick)
+                         this.onTick(timeStamp, deltaTime);
+
+                    for (var i = 0; i < this.stageProps.length; i++)
+                         this.stageProps[i].instance.raiseTickEvent(timeStamp, deltaTime);
+
+               }
+
+               raiseRenderEvent(context) {
+                    if (this.onDraw)
+                         this.onDraw(context);
+
+                    if (this.stageProps.length > 0) {
+                         if (this.sortBy.sortOnRender) {
+                              this.stageProps.sort(this.sortBy.compare);
+                         }
+
+                         for (var i = 0; i < this.stageProps.length; i++)
+                              if (this.stageProps[i].instance.raiseRenderEvent)
+                                   this.stageProps[i].instance.raiseRenderEvent(context);
+                    }
+
+
+                    if (this.onPostDraw)
+                         this.onPostDraw(context);
+               }
+
+               raiseResizeEvent(w, h) {
+                    if (this.onResize)
+                         this.onResize(w, h);
+
+                    for (var i = 0; i < this.stageProps.length; i++)
+                         this.stageProps[i].instance.raiseResizeEvent(this.width, this.height);
+               }
+
+               raiseDisposeEvent() {
+                    if (this.stageProps.length > 0) {
+                         for (var i = 0; i < this.stageProps.length; i++)
+                              if (this.stageProps[i].instance.raiseDisposeEvent)
+                                   this.stageProps[i].instance.raiseDisposeEvent();
+                    }
+                    if (this.onDispose)
+                         this.onDispose();
+               }
+
+               raiseShowStageEvent() {
+
+                    if (this.stageProps.length > 0) {
+                         for (var i = 0; i < this.stageProps.length; i++) {
+                              if (this.stageProps[i].instance.raiseShowStageEvent)
+                                   this.stageProps[i].instance.raiseShowStageEvent();
+
+                         }
+                    }
+                    if (this.onShowStage)
+                         this.onShowStage();
+               }
+
+               raiseHideStageEvent() {
+                    if (this.stageProps.length > 0) {
+                         for (var i = 0; i < this.stageProps.length; i++)
+                              if (this.stageProps[i].instance.raiseHideStageEvent)
+                                   this.stageProps[i].instance.raiseHideStageEvent();
+                    }
+                    if (this.onHideStage)
+                         this.onHideStage();
+               }
+
+          }
+
+          class StageType extends RenderableType {
+               constructor(name, properties = {}) {
+                    super();
+
+                    const size = $1S.Renderer.Canvas.getSize();
+                    this.width = size.width;
+                    this.height = size.height;
+
+                    this.name = name;
+                    $1S.Renderer.register(name, this);
+
+                    if (this.onInit) this.onInit(properties);
+               }
+
+               raiseRenderEvent = (context) => {
+                    context.clearRect(0, 0, this.width, this.height);
+
+                    super.raiseRenderEvent(context);
+
+                    $1S.Renderer.Canvas.publish();
+               }
+
+               raiseResizeEvent(w, h) {
+                    this.width = w;
+                    this.height = h;
+
+                    super.raiseResizeEvent(w, h);
+               }
+
+          }
+
+          class Extension extends $1S.Application.ExtensionType {
+
+               stages = {};
+               activeStageName = null;
+
+               constructor() {
+                    super(0);
+               }
+
+               onLoad = (appPath, properties, oncomplete) => {
+                    if (properties.canvas) {
+                         OneSparkJs.Canvas.initialize(properties.canvas, properties.fullWindow);
+                    }
+                    oncomplete()
+               }
+
+               getActiveName = () => {
+                    return this.activeStageName;
+               }
+
+               register = (name, instance = null) => {
+                    if (!name)
+                         throw new Error("Invalid stage name.");
+
+                    if (this.stages[name])
+                         throw new Error("Stage already defined.");
+
+                    if (instance == null || !(instance instanceof StageType))
+                         throw new Error("Not a StageType.");
+
+                    this.stages[name] = {
+                         Name: name,
+                         instance: instance,
+                         SavedState: null
+                    };
+               }
+
+               raiseResizeEvent = (w,h) => {
+                    if (this.activeStageName == null) return;
+
+                    const stage = this.stages[this.activeStageName];
+
+                    if (!stage) return;
+
+                    stage.instance.raiseResizeEvent(w, h);
+               }
+
+               raiseRenderEvent = () => {
+
+                    if (this.activeStageName == null) return;
+
+                    const stage = this.stages[this.activeStageName];
+
+                    if (!stage) return;
+
+                    const context = $1S.Renderer.Canvas.getContext();
+
+                    stage.instance.raiseRenderEvent(context);
+               }
+
+               get = () => {
+                    var stage = null;
+
+                    if (this.activeStageName != null) {
+                         stage = this.stages[this.activeStageName];
+                    }
+
+                    return stage;
+               }
+
+               destroy = (stageName = null) => {
+                    stageName = stageName || this.activeStageName;
+
+                    if (this.activeStageName === stageName) {
+                         this.stages[this.activeStageName].raiseHideStageEvent();
+                         this.activeStageName = null;
+                    }
+
+                    const stage = this.stages[stageName];
+
+                    if (!stage) {
+                         throw new Error("Stage not found.");
+                    }
+
+                    stage.raiseDisposeEvent();
+
+                    stage.clearProps();
+
+                    delete this.stages[stageName];
+               }
+
+               switchTo = (name) => {
+
+                    if (this.activeStageName != null) {
+                         this.stages[this.activeStageName].instance.raiseHideStageEvent();
+                         this.stages[this.activeStageName].SavedState = $1S.Renderer.Canvas.getState();
+                    }
+
+                    if (name == null) {
+                         this.activeStageName = null;
+                         return;
+                    }
+
+                    if (!this.stages[name]) {
+                         throw new Error(`Stage not found: ${name}`);
+                    }
+
+                    this.activeStageName = name;
+                    if (this.stages[this.activeStageName].SavedState != null) {
+                         if (this.stages[this.activeStageName].SavedState)
+                              $1S.Renderer.Canvas.setState(this.stages[this.activeStageName].SavedState);
+                    }
+
+                    this.stages[this.activeStageName].instance.raiseShowStageEvent();
+
+               }
+
+               handleTickEvent = (timeStamp, deltaTime) => {
+                    if (this.activeStageName) {
+                         const stage = this.stages[this.activeStageName];
+                         stage.instance.raiseTickEvent(timeStamp, deltaTime);
+                    }
+               }
+
+               handlePostTickEvent = (timeStamp, deltaTime) => {
+                    this.raiseRenderEvent();
+               }
+
+               reset = () => {
+
+                    const stageNames = Object.keys(this.stages);
+
+                    for (var i = 0; i < this.stagesNames.length; i++) {
+                         destroy(stageNames[i]);
+                    };
+
+                    this.stages = {};
+                    this.activeStageName = null;
+               }
+
+          }
+
+          const Ext = new Extension();
+
+          return { Vertex, RenderableType, SortByEnum, SortByTypes, StageType, Ext }
+     })();
+
+     //Rederer module
+     OneSparkJs.Renderer2D = (() => {
+
+          //stage prop types
+          const AlignOnEnum = {
+               Center: 0,     //drawn on parent using center coordinate
+               UpperLeft: 1,  //drawn on parent using upper left coordinate (0,0)
+               UpperRight: 2, //drawn on parent using upper right coordinate
+               LowerLeft: 3,  //drawn on parent using lower left coordinate
+               LowerRight: 4  //drawn on parent using lower right coordinate
+          }
+
+          class Orientation extends OneSparkJs.Renderer.Vertex {
+               constructor(x = 0, y = 0, z = 0, alignment = AlignOnEnum.Center, xScale = 1, yScale = 1, rotation = 0) {
+                    super(x, y, z);
+                    this.rotation = rotation;
+                    this.xScale = xScale;
+                    this.yScale = yScale;
+                    this.scaleToContainer = false;
+                    this.alignment = alignment;
+               }
+
+               get alignment() {
+                    return this._alignment;
+               }
+
+               set alignment(value) {
+                    if (Object.values(AlignOnEnum).indexOf(value) === -1) {
+                         throw new Error('Invalid alignment value');
+                    }
+                    this._alignment = value;
+               }
+          }
+
+          class StagePropType extends OneSparkJs.Renderer.RenderableType {
+
+               constructor(properties = {}, skipInit = false) {
+                    super();
+
+                    this.orientation = new Orientation(
+                         properties.x || 0,
+                         properties.y || 0,
+                         properties.z || 0,
+                         properties.alignment || AlignOnEnum.Center,
+                         properties.xScale || 1,
+                         properties.yScale || 1,
+                         properties.rotation || 0
+                    )
+
+                    this.width = properties.width || 100;
+                    this.height = properties.height || 100;
+                    this.isVisible = properties.isShown || true;
+
+                    //get screen size
+                    const size = $1S.Renderer.Canvas.getSize();
+                    this.screenWidth = size.width;
+                    this.screenHeight = size.height;
+
+                    this.workCanvas = document.createElement('canvas');
+                    this.workCanvas.width = this.width;
+                    this.workCanvas.height = this.height;
+                    this.workContext = this.workCanvas.getContext('2d')
+
+                    if ((!skipInit) && this.onInit) this.onInit(properties);
+               }
+
+               getRegion() {
+                    const xScale = this.orientation.xScale;
+                    const yScale = this.orientation.yScale;
+
+                    switch (this.orientation.alignment) {
+                         case AlignOnEnum.Center:
+                              return {
+                                   x1: this.orientation.x - this.width * xScale / 2,
+                                   y1: this.orientation.y - this.height * yScale / 2,
+                                   x2: this.orientation.x + this.width * xScale / 2,
+                                   y2: this.orientation.y + this.height * yScale / 2
+                              };
+                              break;
+
+                         case AlignOnEnum.UpperLeft:
+                              return {
+                                   x1: this.orientation.x,
+                                   y1: this.orientation.y,
+                                   x2: this.orientation.x + this.width * xScale,
+                                   y2: this.orientation.y + this.height * yScale
+                              };
+                              break;
+
+                         case AlignOnEnum.UpperRight:
+                              return {
+                                   x1: this.orientation.x - this.width * xScale,
+                                   y1: this.orientation.y,
+                                   x2: this.orientation.x,
+                                   y2: this.orientation.y + this.height * yScale
+                              };
+                              break;
+
+                         case AlignOnEnum.LowerLeft:
+                              return {
+                                   x1: this.orientation.x,
+                                   y1: this.orientation.y - this.height * yScale,
+                                   x2: this.orientation.x + this.width * xScale,
+                                   y2: this.orientation.y
+                              };
+                              break;
+
+                         case AlignOnEnum.LowerRight:
+                              return {
+                                   x1: this.orientation.x - this.width * xScale,
+                                   y1: this.orientation.y - this.height * yScale,
+                                   x2: this.orientation.x,
+                                   y2: this.orientation.y
+                              };
+                              break;
+
+                         default:
+                              return {
+                                   x1: this.orientation.x,
+                                   y1: this.orientation.y,
+                                   x2: this.orientation.x + this.width * xScale,
+                                   y2: this.orientation.y + this.height * yScale
+                              };
+                              break;
+                    }
+               }
+
+               setRegion(region) {
+
+                    const ratio = this.width / this.height;
+
+                    var regionWidth = Math.abs(region.x2 - region.x1);
+                    var regionHeight = (regionHeight / this.height);
+
+                    var adjustedHeight = regionWidth / ratio;
+
+                    if (adjustedHeight > regionHeight) {
+                         adjustedHeight = regionHeight;
+                         this.orientation.xScale = (adjustedHeight / this.height);
+                         this.orientation.yScale = this.orientation.xScale;
+                    } else {
+                         this.orientation.xScale = (regionWidth / this.width);
+                         this.orientation.yScale = this.orientation.xScale;
+                    }
+
+                    switch (this.orientation.alignment) {
+                         case AlignOnEnum.Center:
+                              this.orientation.x = region.x1 + ((region.x2 - region.x1) / 2);
+                              this.orientation.y = region.y1 + ((region.y2 - region.y1) / 2);
+                              break;
+                         case AlignOnEnum.UpperLeft:
+                              this.orientation.x = region.x1;
+                              this.orientation.y = region.y1;
+                              break;
+                         case AlignOnEnum.UpperRight:
+                              this.orientation.x = region.x2;
+                              this.orientation.y = region.y1;
+                              break;
+                         case AlignOnEnum.LowerLeft:
+                              this.orientation.x = region.x1;
+                              this.orientation.y = region.y2;
+                              break;
+                         case AlignOnEnum.LowerRight:
+                              this.orientation.x = region.x2;
+                              this.orientation.y = region.y2;
+                              break;
+                         default:
+                              this.orientation.x = region.x1;
+                              this.orientation.y = region.y1;
+                              break;
+                    }
+
+               }
+
+               show() {
+                    this.isVisible = true;
+               }
+
+               hide() {
+                    this.isVisible = false;
+               }
+
+               raiseRenderEvent = (context) => {
+
+                    if (!this.isVisible) return;
+
+                    if (this.onDraw)
+                         this.onDraw(this.workContext);
+
+                    super.raiseRenderEvent(this.workContext);
+
+                    if (this.onPostDraw)
+                         this.onPostDraw(this.workContext);
+
+                    const scaledWidth = this.width * this.orientation.xScale;
+                    const scaledHeight = this.height * this.orientation.yScale;
+
+                    if (this.orientation.rotation != 0) {
+                         const rotationAngle = (Math.PI / 180) * this.orientation.rotation;
+
+                         switch (this.orientation.alignment) {
+                              case AlignOnEnum.Center:
+                                   context.save();
+                                   context.translate(this.orientation.x, this.orientation.y);
+                                   context.rotate(rotationAngle);
+                                   context.scale(this.orientation.xScale, this.orientation.yScale);
+                                   context.translate(-(scaledWidth / 2), -(scaledHeight / 2));
+                                   context.drawImage(this.workCanvas, 0, 0, this.width, this.height, 0, 0, scaledWidth, scaledHeight);
+                                   context.restore();
+                                   break;
+                              case AlignOnEnum.UpperLeft:
+                                   context.save();
+                                   context.translate(this.orientation.x, this.orientation.y);
+                                   context.rotate(rotationAngle);
+                                   context.scale(this.orientation.xScale, this.orientation.yScale);
+                                   context.drawImage(this.workCanvas, 0, 0, this.width, this.height, 0, 0, scaledWidth, scaledHeight);
+                                   context.restore();
+                                   break;
+                              case AlignOnEnum.UpperRight:
+                                   context.save();
+                                   context.translate(this.orientation.x, this.orientation.y);
+                                   context.rotate(rotationAngle);
+                                   context.scale(this.orientation.xScale, this.orientation.yScale);
+                                   context.translate(-scaledWidth, 0);
+                                   context.drawImage(this.workCanvas, 0, 0, this.width, this.height, 0, 0, scaledWidth, scaledHeight);
+                                   context.restore();
+                                   break;
+                              case AlignOnEnum.LowerLeft:
+                                   context.save();
+                                   context.translate(this.orientation.x, this.orientation.y);
+                                   context.rotate(rotationAngle);
+                                   context.scale(this.orientation.xScale, this.orientation.yScale);
+                                   context.translate(0, -scaledHeight);
+                                   context.drawImage(this.workCanvas, 0, 0, this.width, this.height, 0, 0, scaledWidth, scaledHeight);
+                                   context.restore();
+                                   break;
+                              case AlignOnEnum.LowerRight:
+                                   context.save();
+                                   context.translate(this.orientation.x, this.orientation.y);
+                                   context.rotate(rotationAngle);
+                                   context.scale(this.orientation.xScale, this.orientation.yScale);
+                                   context.translate(-scaledWidth, -scaledHeight);
+                                   context.drawImage(this.workCanvas, 0, 0, this.width, this.height, 0, 0, scaledWidth, scaledHeight);
+                                   context.restore();
+                                   break;
+                              default:
+                                   context.save();
+                                   context.translate(this.orientation.x, this.orientation.y);
+                                   context.rotate(rotationAngle);
+                                   context.scale(this.orientation.xScale, this.orientation.yScale);
+                                   context.translate(-(scaledWidth / 2), -(scaledHeight / 2));
+                                   context.drawImage(this.workCanvas, 0, 0, this.width, this.height, 0, 0, scaledWidth, scaledHeight);
+                                   context.restore();
+                         }
+                    } else {
+                         switch (this.orientation.alignment) {
+                              case AlignOnEnum.Center:
+                                   context.drawImage(
+                                        this.workCanvas,
+                                        0,
+                                        0,
+                                        this.width,
+                                        this.height,
+                                        this.orientation.x - (scaledWidth / 2),
+                                        this.orientation.y - (scaledHeight / 2),
+                                        scaledWidth,
+                                        scaledHeight
+                                   );
+                                   break;
+                              case AlignOnEnum.UpperLeft:
+                                   context.drawImage(
+                                        this.workCanvas,
+                                        0,
+                                        0,
+                                        this.width,
+                                        this.height,
+                                        this.orientation.x,
+                                        this.orientation.y,
+                                        scaledWidth,
+                                        scaledHeight
+                                   );
+                                   break;
+                              case AlignOnEnum.UpperRight:
+                                   context.drawImage(
+                                        this.workCanvas,
+                                        0,
+                                        0,
+                                        this.width,
+                                        this.height,
+                                        this.orientation.x,
+                                        this.orientation.y - scaledHeight,
+                                        scaledWidth,
+                                        scaledHeight
+                                   );
+                                   break;
+                              case AlignOnEnum.LowerLeft:
+                                   context.drawImage(
+                                        this.workCanvas,
+                                        0,
+                                        0,
+                                        this.width,
+                                        this.height,
+                                        this.orientation.x - scaledWidth,
+                                        this.orientation.y,
+                                        scaledWidth,
+                                        scaledHeight
+                                   );
+                                   break;
+                              case AlignOnEnum.LowerRight:
+                                   context.drawImage(
+                                        this.workCanvas,
+                                        0,
+                                        0,
+                                        this.width,
+                                        this.height,
+                                        this.orientation.x - scaledWidth,
+                                        this.orientation.y - scaledHeight,
+                                        scaledWidth,
+                                        scaledHeight
+                                   );
+                                   break;
+                              default:
+                                   context.drawImage(
+                                        this.workCanvas,
+                                        0,
+                                        0,
+                                        this.width,
+                                        this.height,
+                                        this.orientation.x - (scaledWidth / 2),
+                                        this.orientation.y - (scaledHeight / 2),
+                                        scaledWidth,
+                                        scaledHeight
+                                   );
+                         }
+
+                    }
+
+               }
+
+          }
+
+          class SpritePropType extends StagePropType {
+
+               constructor(properties = {}) {
+                    super(properties);
+
+                    this.activeLoop = null;
+                    this.spriteLoop = {};
+
+                    this.frame = properties.frameStart || 0;
+                    this.framesPerSecond = properties.framesPerSecond || 12;
+                    this.frameTime = 1000 / this.framesPerSecond;
+
+                    this.sizeChange = false;
+
+                    this.renderedFrame = -1;
+                    this.lastFrameUpdateTime = 0;
+
+                    if (properties.groupName)
+                         this.loadGroup(properties.groupName);
+
+                    if (properties.imageName)
+                         this.loadImage(properties.imageName, 1);
+
+               }
+
+               onInit(properties) {
+                    console.log("SpritePropType onInit");
+               }
+
+               onTick(timeStamp, deltaTime) {
+                    if (this.activeLoop && this.isVisible && this.activeLoop.clipPaths.length > 1) {
+                         const timeSinceLastFrameUpdate = timeStamp - this.lastFrameUpdateTime;
+                         if (timeSinceLastFrameUpdate >= this.frameTime) {
+                              this.lastFrameUpdateTime = timeStamp;
+                              this.frame++;
+                              if (this.frame >= this.activeLoop.clipPaths.length) {
+                                   this.frame = 0;
+                              }
+                         }
+                    }
+               }
+
+               onDraw(context) {
+                    if (this.activeLoop && this.isVisible && this.frame != this.renderedFrame) {
+                         const groupCanvas = this.activeLoop.clipPaths[this.frame].Canvas;
+                         const groupContext = this.activeLoop.clipPaths[this.frame].CanvasContext;
+
+                         context.clearRect(0, 0, this.width, this.height);
+                         context.drawImage(groupCanvas, 0, 0);
+
+                         this.renderedFrame = this.frame;
+                    }
+               }
+
+               loadGroup(loopName) {
+                    if (!loopName)
+                         throw new Error("A sprite group is required.")
+
+                    const loop = $1S.Assets.getSpriteLoop(loopName);
+
+                    if (!loop)
+                         throw new Error(`Sprite group ${loopName} not found.`)
+
+                    this.adjustCanvas(loop);
+
+                    this.spriteLoop[loopName] = loop;
+
+                    if (!this.activeLoop) {
+                         this.activeLoop = loop;
+                    };
+               }
+
+               loadImage(imageName, frameCount) {
+                    if (!imageName)
+                         throw new Error("An image is required.")
+
+                    const image = $1S.Assets.getImage(imageName);
+
+                    if (!image)
+                         throw new Error(`Sprite image ${imageName} not found.`)
+
+                    const group = {
+                         group: imageName,
+                         clipPaths: []
+                    }
+
+                    for (var i = 0; i < frameCount; i++) {
+                         group.clipPaths.push({
+                              Canvas: image.Canvas,
+                              CanvasContext: image.CanvasContext
+                         });
+                    }
+
+                    this.adjustCanvas(group);
+
+                    this.spriteLoop[imageName] = group;
+
+                    if (!this.activeLoop) {
+                         this.activeLoop = group;
+                    };
+               }
+
+               show(groupName) {
+
+                    var group = this.spriteLoop[groupName];
+
+                    if (!group) {
+                         this.loadGroup(groupName)
+                         group = this.spriteLoop[groupName];
+                    }
+
+                    this.frame = 0;
+                    this.activeLoop = group;
+               }
+
+               adjustCanvas(group) {
+
+                    var changeSize = false;
+
+                    for (var i = 0; i < group.clipPaths.length; i++) {
+                         if (this.width < group.clipPaths[i].Canvas.width) {
+                              this.width = group.clipPaths[i].Canvas.width;
+                              changeSize = true;
+                         }
+
+                         if (this.height < group.clipPaths[i].Canvas.height) {
+                              this.height = group.clipPaths[i].Canvas.height;
+                              changeSize = true;
+                         }
+                    }
+
+                    if (changeSize) {
+                         this.workCanvas.width = this.width;
+                         this.workCanvas.height = this.height;
+                         this.workContext = this.workCanvas.getContext('2d');
+                    }
+
+               }
+
+          }
+
+          class TilesetPropType extends StagePropType {
+
+               constructor(layoutName, properties = {}) {
+                    super(properties);
+
+                    if (!layoutName)
+                         throw new Error(`Layout name invalid.`)
+
+                    this.layoutName = layoutName;
+
+                    this.tiles = [];
+
+                    this.initialize();
+               }
+
+               initialize() {
+                    var layout = $1S.Assets.getTileset(this.layoutName);
+
+                    if (!layout)
+                         throw new Error(`Layout ${layoutName} not found.`)
+
+                    for (var i = 0; i < layout.tiles.length; i++) {
+                         const tile = layout.tiles[i];
+
+                         const sprite = new SpritePropType(
+                              {
+                                   imageName: tile.imageName,
+                                   groupName: tile.groupName,
+                                   framesPerSecond: tile.frameRate || 0,
+                                   framesStart: tile.frameStart || 0,
+                                   x: tile.x || 0,
+                                   y: tile.y || 0,
+                                   alignOn: tile.alignOn || AlignOnEnum.UpperLeft
+                              });
+
+                         this.registerProp(sprite);
+
+                    };
+
+               }
+
+          }
+
+          //prop transforms
           class TransformType {
 
                constructor(parent, child, properties) {
@@ -64,6 +910,10 @@
                }
 
                raiseRenderEvent(context) {
+
+                    if (this.onDraw)
+                         this.onDraw(context);
+
                     this.child.raiseRenderEvent(context);
                }
 
@@ -72,14 +922,19 @@
                     if (this.onResize)
                          this.onResize(w, h);
 
-                    this.child.raiseRenderEvent(w, h);
+                    this.child.raiseResizeEvent(w, h);
                }
 
                raiseDisposeEvent() {
+
+                    if (this.onDispose)
+                         this.onDispose(w, h);
+
                     this.child.raiseDisposeEvent();
                }
 
                raiseShowStageEvent() {
+
                     this.child.raiseShowStageEvent();
                }
 
@@ -88,6 +943,13 @@
                }
 
           }
+
+          const AnchorTypeEnum = {
+               None: 0,
+               Absolute: 1,
+               Relative: 2,
+               Centered: 3
+          };
 
           class AnchorTransformType extends TransformType {
 
@@ -102,10 +964,13 @@
                     this.anchorBottomValue = properties.anchorBottomValue || 0;
 
                     this.updateRegion();
+
+                    console.log("AnchorTransformType");
+
                }
 
                onResize() {
-                    this.updateRegion(); 
+                    this.updateRegion();
                }
 
                updateRegion() {
@@ -186,683 +1051,17 @@
                          }
                     }
 
-                    this.child.setRegion(this.childRegion); 
-
-               }
-
-
-          }
-
-          class RenderableType {
-
-               constructor(properties = {}) {
-                    this.id = $1S.Helper.newId();
-                    this.stageProps = [];  //sub props
-
-                    if (this.sortBy)
-                         this.setRenderSort(this.sortBy);
-                    else
-                         this.setRenderSort(SortByEnum.ByPriority);
-               }
-
-               setRenderSort = (sortByEnum) => {
-
-                    if (sortByEnum == SortByEnum.ByPriority) {
-                         this.sortBy = OneSparkJs.Renderer.SortByTypes.ByPriority;
-                    }
-                    if (sortByEnum == SortByEnum.ByDepth) {
-                         this.sortBy = OneSparkJs.Renderer.SortByTypes.ByDepth;
-                    }
-               }
-
-               registerProp = (instance, properties = {}, priority = 100000) => {
-
-                    if ((!(instance instanceof StagePropType)) && !(instance instanceof TransformType))
-                         throw new Error("Not a StagePropType or TransformType component.");
-
-                    const newRegistration = {
-                         Instance: instance,
-                         Properties: properties,
-                         Priority: priority
-                    };
-
-                    this.stageProps.push(newRegistration);
-
-                    if (this.sortBy.sortOnRegister) {
-                         this.stageProps.sort(this.sortBy.compare);
-                    }
-
-                    return this.registerProp;
-               }
-
-               getProp = (id) => {
-
-                    const subPropsObj = this.stageProps.find(prop => prop.Instance.id === id);
-
-                    if (subPropsObj) {
-                         return subPropsObj.Instance;
-                    }
-
-                    return null;
-               }
-
-               destroyProp = (id) => {
-
-                    const index = this.stageProps.findIndex(prop => prop.Instance.id === id);
-
-                    if (index !== -1) {
-                         if (this.stageProps[index].onDestroy)
-                              this.stageProps[index].onDestroy();
-
-                         this.stageProps.splice(index, 1);
-                         return true;
-                    }
-
-                    return false;
-               }
-
-               clearProps = () => {
-                    for (var i = 0; i < this.stageProps.length; i++)
-                         if (this.stageProps[i].onDestroy)
-                              this.stageProps[i].onDestroy();
-
-                    this.stageProps[i] = [];
-               }
-
-               raiseTickEvent (timeStamp, deltaTime) {
-
-                    if (this.onTick)
-                         this.onTick(timeStamp, deltaTime);
-
-                    for (var i = 0; i < this.stageProps.length; i++)
-                         this.stageProps[i].Instance.raiseTickEvent(timeStamp, deltaTime);
-
-               }
-
-               raiseRenderEvent(context) {
-                    if (this.onDraw)
-                         this.onDraw(context);
-
-                    if (this.stageProps.length > 0) {
-                         if (this.sortBy.sortOnRender) {
-                              this.stageProps.sort(this.sortBy.compare);
-                         }
-
-                         for (var i = 0; i < this.stageProps.length; i++)
-                              if (this.stageProps[i].Instance.raiseRenderEvent)
-                                   this.stageProps[i].Instance.raiseRenderEvent(context);
-                    }
-
-
-                    if (this.onPostDraw)
-                         this.onPostDraw(context);
-               }
-
-               raiseResizeEvent(w, h) {
-                    if (this.onResize)
-                         this.onResize(w, h);
-
-                    for (var i = 0; i < this.stageProps.length; i++)
-                         this.stageProps[i].Instance.raiseResizeEvent(this.width, this.height);
-               }
-
-               raiseDisposeEvent() {
-                    if (this.stageProps.length > 0) {
-                         for (var i = 0; i < this.stageProps.length; i++)
-                              if (this.stageProps[i].Instance.raiseDisposeEvent)
-                                   this.stageProps[i].Instance.raiseDisposeEvent();
-                    }
-                    if (this.onDispose)
-                         this.onDispose();
-               }
-
-               raiseShowStageEvent() {
-
-                    if (this.stageProps.length > 0) {
-                         for (var i = 0; i < this.stageProps.length; i++) {
-                              if (this.stageProps[i].Instance.raiseShowStageEvent)
-                                   this.stageProps[i].Instance.raiseShowStageEvent();
-
-                         }
-                    }
-                    if (this.onShowStage)
-                         this.onShowStage();
-               }
-
-               raiseHideStageEvent() {
-                    if (this.stageProps.length > 0) {
-                         for (var i = 0; i < this.stageProps.length; i++)
-                              if (this.stageProps[i].Instance.raiseHideStageEvent)
-                                   this.stageProps[i].Instance.raiseHideStageEvent();
-                    }
-                    if (this.onHideStage)
-                         this.onHideStage();
-               }
-
-          }
-
-          class StageType extends RenderableType {
-               constructor(name, properties = {}) {
-                    super();
-
-                    const size = $1S.Renderer.Graphics.getSize();
-                    this.width = size.width;
-                    this.height = size.height;
-
-                    this.name = name;
-                    $1S.Renderer.register(name, this);
-
-                    if (this.onInit) this.onInit(properties);
-               }
-
-               raiseRenderEvent = (context) => {
-                    context.clearRect(0, 0, this.width, this.height);
-
-                    super.raiseRenderEvent(context);
-
-                    $1S.Renderer.Graphics.publish();
-               }
-
-               raiseResizeEvent(w, h) {
-                    this.width = w;
-                    this.height = h;
-
-                    super.raiseResizeEvent(w, h);
-               }
-
-          }
-
-          class StagePropType extends RenderableType {
-
-               constructor(properties = {}, skipInit = false) {
-                    super();
-                    this.x = properties.x || 0;
-                    this.y = properties.y || 0;
-                    this.z = properties.z || 0;
-                    this.width = properties.width || 100;
-                    this.height = properties.height || 100;
-                    this.rotation = properties.rotation || 0;
-                    this.isVisible = properties.isShown || true;
-                    this.alignOn = properties.alignOn || AlignOnEnum.Center;
-
-                    //get screen size
-                    const size = $1S.Renderer.Graphics.getSize();
-                    this.screenWidth = size.width;
-                    this.screenHeight = size.height;
-
-                    this.workCanvas = document.createElement('canvas');
-                    this.workCanvas.width = this.width;
-                    this.workCanvas.height = this.height;
-                    this.workContext = this.workCanvas.getContext('2d')
-
-                    if ((!skipInit) && this.onInit) this.onInit(properties);
-               }
-
-               getRegion() {
-                    switch (this.alignOn) {
-                         case AlignOnEnum.Center:
-                             return { x1: this.x - this.width / 2, y1: this.y - this.height / 2, x2: this.x + this.width / 2, y2: this.y + this.height / 2 };
-                              break;
-                         case AlignOnEnum.UpperLeft:
-                              return { x1: this.x, y1: this.y, x2: this.x + this.width, y2: this.y + this.height };
-                              break;
-                         case AlignOnEnum.UpperRight:
-                              return { x1: this.x - this.width, y1: this.y, x2: this.x, y2: this.y + this.height };
-                              break;
-                         case AlignOnEnum.LowerLeft:
-                              return { x1: this.x, y1: this.y - this.height, x2: this.x + this.width, y2: this.y };
-                              break;
-                         case AlignOnEnum.LowerRight:
-                              return { x1: this.x - this.width, y1: this.y - this.height, x2: this.x, y2: this.y };
-                              break;
-                         default:
-                              return { x1: this.x, y1: this.y, x2: this.x + this.width, y2: this.y + this.height };
-                              break;
-                    }
-               }
-
-               setRegion(region) {
-                    this.width = Math.abs(region.x2 - region.x1);
-                    this.height = Math.abs(region.y2 - region.y1);
-
-                    switch (this.alignOn) {
-                         case AlignOnEnum.Center:
-                              this.x = (region.x1 + region.x2) / 2;
-                              this.y = (region.y1 + region.y2) / 2;
-                              break;
-                         case AlignOnEnum.UpperLeft:
-                              this.x = region.x1;
-                              this.y = region.y1;
-                              break;
-                         case AlignOnEnum.UpperRight:
-                              this.x = region.x2;
-                              this.y = region.y1;
-                              break;
-                         case AlignOnEnum.LowerLeft:
-                              this.x = region.x1;
-                              this.y = region.y2;
-                              break;
-                         case AlignOnEnum.LowerRight:
-                              this.x = region.x2;
-                              this.y = region.y2;
-                              break;
-                         default:
-                              this.x = region.x1;
-                              this.y = region.y1;
-                              break;
-                    }
-               }
-
-               show() {
-                    this.isVisible = true;
-               }
-
-               hide() {
-                    this.isVisible = false;
-               }
-
-               raiseRenderEvent = (context) => {
-
-                    if (!this.isVisible) return;
-
-                    if (context == null)
-                         throw new Error("Canvas context is missing.")
-
-                    if (this.onDraw)
-                         this.onDraw(this.workContext);
-
-                    super.raiseRenderEvent(this.workContext);
-
-                    if (this.onPostDraw)
-                         this.onPostDraw(this.workContext);
-
-                    if (this.rotation != 0) {
-                         //for now, rotations always assume an AlignOnEnum of Center
-                         const rotationAngle = (Math.PI / 180) * this.rotation;
-                         context.save();
-                         context.translate(this.x, this.y);
-                         context.rotate(rotationAngle);
-                         context.translate(-(this.width / 2), -(this.height /2 ));
-                         context.drawImage(this.workCanvas, 0, 0);
-                         context.restore();
-                    } else {
-                         switch (this.alignOn) {
-                              case AlignOnEnum.Center:
-                                   context.drawImage(
-                                        this.workCanvas,
-                                        this.x - (this.width / 2),
-                                        this.y - (this.height / 2)
-                                   );
-                                   break;
-                              case AlignOnEnum.UpperLeft:
-                                   context.drawImage(
-                                        this.workCanvas,
-                                        this.x,
-                                        this.y
-                                   );
-                                   break;
-                              case AlignOnEnum.UpperRight:
-                                   context.drawImage(
-                                        this.workCanvas,
-                                        this.x,
-                                        this.y - this.height
-                                   );
-                                   break;
-                              case AlignOnEnum.LowerLeft:
-                                   context.drawImage(
-                                        this.workCanvas,
-                                        this.x - this.width,
-                                        this.y
-                                   );
-                                   break;
-                              case AlignOn.LowerRight:
-                                   context.drawImage(
-                                        this.workCanvas,
-                                        this.x - this.width,
-                                        this.y - this.height
-                                   );
-                                   break;
-                              default:
-                                   context.drawImage(
-                                        this.workCanvas,
-                                        this.x - (this.width / 2),
-                                        this.y - (this.height / 2)
-                                   );
-                         }
-                    }
+                    this.child.setRegion(this.childRegion);
 
                }
 
           }
 
-          class SpritePropType extends StagePropType {
-
-               constructor(properties = {}) {
-                    super(properties);
-
-                    this.framesPerSecond = properties.framesPerSecond || 12;
-
-                    this.activeLoop = null;
-                    this.spriteLoop = {};
-
-                    this.frame = properties.frameStart || 0;
-                    this.framesPerSecond = properties.framesPerSecond || 12;
-                    this.frameTime = 1000 / this.framesPerSecond;
-
-                    this.sizeChange = false;
-
-                    this.renderedFrame = -1;
-                    this.lastFrameUpdateTime = 0;
-
-                    if (properties.groupName)
-                         this.loadGroup(properties.groupName);
-
-                    if (properties.imageName)
-                         this.loadImage(properties.imageName, 1);
-
-               }
-
-               loadGroup(loopName) {
-                    if (!loopName)
-                         throw new Error("A sprite group is required.")
-
-                    const loop = $1S.Assets.getSpriteLoop(loopName);
-
-                    if (!loop)
-                         throw new Error(`Sprite group ${loopName} not found.`)
-
-                    this.adjustSize(loop);
-
-                    this.spriteLoop[loopName] = loop;
-
-                    if (!this.activeLoop) {
-                         this.activeLoop = loop;
-                    };
-               }
-
-               loadImage(imageName, frameCount) {
-                    if (!imageName)
-                         throw new Error("An image is required.")
-
-                    const image = $1S.Assets.getImage(imageName);
-
-                    if (!image)
-                         throw new Error(`Sprite image ${imageName} not found.`)
-
-                    const group = {
-                         group: imageName,
-                         clipPaths: []
-                    }
-
-                    for (var i = 0; i < frameCount; i++) {
-                         group.clipPaths.push({
-                              Canvas: image.Canvas,
-                              CanvasContext: image.CanvasContext
-                         });
-                    }
-
-                    this.adjustSize(group);
-
-                    this.spriteLoop[imageName] = group;
-
-                    if (!this.activeLoop) {
-                         this.activeLoop = group;
-                    };
-               }
-
-               adjustSize(group) {
-                    var changeSize = false;
-
-                    for (var i = 0; i < group.clipPaths.length; i++) {
-                         if (this.width < group.clipPaths[i].Canvas.width) {
-                              this.width = group.clipPaths[i].Canvas.width;
-                              changeSize = true;
-                         }
-
-                         if (this.height < group.clipPaths[i].Canvas.height) {
-                              this.height = group.clipPaths[i].Canvas.height;
-                              changeSize = true;
-                         }
-                    }
-
-                    if (changeSize) {
-                         this.workCanvas.width = this.width;
-                         this.workCanvas.height = this.height;
-                         this.workContext = this.workCanvas.getContext('2d');
-                    }
-               }
-
-               show(groupName) {
-
-                    var group = this.spriteLoop[groupName];
-
-                    if (!group) {
-                         this.loadGroup(groupName)
-                         group = this.spriteLoop[groupName];
-                    }
-
-                    this.frame = 0;
-                    this.activeLoop = group;
-               }
-
-               onTick(timeStamp, deltaTime) {
-                    if (this.activeLoop && this.isVisible && this.activeLoop.clipPaths.length > 1) {
-                         const timeSinceLastFrameUpdate = timeStamp - this.lastFrameUpdateTime;
-                         if (timeSinceLastFrameUpdate >= this.frameTime) {
-                              this.lastFrameUpdateTime = timeStamp;
-                              this.frame++;
-                              if (this.frame >= this.activeLoop.clipPaths.length) {
-                                   this.frame = 0;
-                              }
-                         }
-                    }
-               }
-
-               onDraw(context) {
-                    if (this.activeLoop && this.isVisible && this.frame != this.renderedFrame) {
-                         const groupCanvas = this.activeLoop.clipPaths[this.frame].Canvas;
-                         const groupContext = this.activeLoop.clipPaths[this.frame].CanvasContext;
-
-                         context.clearRect(0, 0, this.workCanvas.width, this.workCanvas.height);
-                         context.drawImage(groupCanvas, 0, 0);
-                         this.renderedFrame = this.frame;
-                    }
-               }
-
-          }
-
-          class TilesetPropType extends StagePropType {
-
-               constructor(layoutName, properties = {}) {
-                    super(properties);
-
-                    if (!layoutName)
-                         throw new Error(`Layout name invalid.`)
-
-                    this.layoutName = layoutName;
-
-                    this.tiles = [];
-
-                    this.initialize();
-               }
-
-               initialize() {
-                    var layout = $1S.Assets.getTileset(this.layoutName);
-
-                    if (!layout)
-                         throw new Error(`Layout ${layoutName} not found.`)
-
-                    for (var i = 0; i < layout.tiles.length; i++) {
-                         const tile = layout.tiles[i];
-
-                         const sprite = new $1S.Renderer.Type.SpriteType(
-                              {
-                                   imageName: tile.imageName,
-                                   groupName: tile.groupName,
-                                   framesPerSecond: tile.frameRate || 0,
-                                   framesStart: tile.frameStart || 0,
-                                   x: tile.x || 0,
-                                   y: tile.y || 0,
-                                   alignOn: tile.alignOn || $1S.Renderer.Type.AlignOn.UpperLeft
-                              });
-
-                         this.registerProp(sprite);
-
-                    };
-
-               }
-
-          }
-
-          class Extension extends $1S.Application.ExtensionType {
-
-               stages = {};
-               activeStageName = null;
-
-               constructor() {
-                    super(0);
-               }
-
-               onLoad = (appPath, properties, oncomplete) => {
-                    if (properties.canvas) {
-                         OneSparkJs.Graphics.initialize(properties.canvas, properties.fullWindow);
-                    }
-                    oncomplete()
-               }
-
-               getActiveName = () => {
-                    return this.activeStageName;
-               }
-
-               register = (name, instance = null) => {
-                    if (!name)
-                         throw new Error("Invalid stage name.");
-
-                    if (this.stages[name])
-                         throw new Error("Stage already defined.");
-
-                    if (instance == null || !(instance instanceof StageType))
-                         throw new Error("Not a StageType.");
-
-                    this.stages[name] = {
-                         Name: name,
-                         Instance: instance,
-                         SavedState: null
-                    };
-               }
-
-               raiseResizeEvent = (w,h) => {
-                    if (this.activeStageName == null) return;
-
-                    const stage = this.stages[this.activeStageName];
-
-                    if (!stage) return;
-
-                    stage.Instance.raiseResizeEvent(w, h);
-               }
-
-               raiseRenderEvent = () => {
-
-                    if (this.activeStageName == null) return;
-
-                    const stage = this.stages[this.activeStageName];
-
-                    if (!stage) return;
-
-                    const context = $1S.Renderer.Graphics.getContext();
-
-                    stage.Instance.raiseRenderEvent(context);
-               }
-
-               get = () => {
-                    var stage = null;
-
-                    if (this.activeStageName != null) {
-                         stage = this.stages[this.activeStageName];
-                    }
-
-                    return stage;
-               }
-
-               destroy = (stageName = null) => {
-                    stageName = stageName || this.activeStageName;
-
-                    if (this.activeStageName === stageName) {
-                         this.stages[this.activeStageName].raiseHideStageEvent();
-                         this.activeStageName = null;
-                    }
-
-                    const stage = this.stages[stageName];
-
-                    if (!stage) {
-                         throw new Error("Stage not found.");
-                    }
-
-                    stage.raiseDisposeEvent();
-
-                    stage.clearProps();
-
-                    delete this.stages[stageName];
-               }
-
-               switchTo = (name) => {
-
-                    if (this.activeStageName != null) {
-                         this.stages[this.activeStageName].Instance.raiseHideStageEvent();
-                         this.stages[this.activeStageName].SavedState = $1S.Renderer.Graphics.getState();
-                    }
-
-                    if (name == null) {
-                         this.activeStageName = null;
-                         return;
-                    }
-
-                    if (!this.stages[name]) {
-                         throw new Error(`Stage not found: ${name}`);
-                    }
-
-                    this.activeStageName = name;
-                    if (this.stages[this.activeStageName].SavedState != null) {
-                         if (this.stages[this.activeStageName].SavedState)
-                              $1S.Renderer.Graphics.setState(this.stages[this.activeStageName].SavedState);
-                    }
-
-                    this.stages[this.activeStageName].Instance.raiseShowStageEvent();
-
-               }
-
-               handleTickEvent = (timeStamp, deltaTime) => {
-                    if (this.activeStageName) {
-                         const stage = this.stages[this.activeStageName];
-                         stage.Instance.raiseTickEvent(timeStamp, deltaTime);
-                    }
-               }
-
-               handlePostTickEvent = (timeStamp, deltaTime) => {
-                    this.raiseRenderEvent();
-               }
-
-               reset = () => {
-
-                    const stageNames = Object.keys(this.stages);
-
-                    for (var i = 0; i < this.stagesNames.length; i++) {
-                         destroy(stageNames[i]);
-                    };
-
-                    this.stages = {};
-                    this.activeStageName = null;
-               }
-
-          }
-
-          const Ext = new Extension();
-
-          return { AlignOnEnum, StageType, SortByEnum, SortByTypes, StagePropType, SpritePropType, TilesetPropType, AnchorTypeEnum, AnchorTransformType, Ext }
+          return { AlignOnEnum, Orientation, StagePropType, SpritePropType, TilesetPropType, TransformType, AnchorTypeEnum, AnchorTransformType}
      })();
 
      // Graphics module
-     OneSparkJs.Graphics = (() => {
+     OneSparkJs.Canvas = (() => {
           let canvas = null;
           let context = null;
           let workCanvas = null;
@@ -1006,25 +1205,29 @@
      // Public API
      global.$1S.Renderer = {
           Type: {
-               AlignOn: OneSparkJs.Renderer.AlignOnEnum,
+               Vertex: OneSparkJs.Renderer.Vertex,
                SortBy: OneSparkJs.Renderer.SortByEnum,
-               StageType: OneSparkJs.Renderer.StageType,
-               StagePropType: OneSparkJs.Renderer.StagePropType,
-               SpriteType: OneSparkJs.Renderer.SpritePropType,
-               TilesetType: OneSparkJs.Renderer.TilesetPropType,
-               Transforms: {
-                    AnchorType: OneSparkJs.Renderer.AnchorTypeEnum,
-                    AnchorTransform: OneSparkJs.Renderer.AnchorTransformType
-               }
+               Stage: OneSparkJs.Renderer.StageType,
+               Render2D: {
+                    AlignOn: OneSparkJs.Renderer2D.AlignOnEnum,
+                    Orientation: OneSparkJs.Renderer2D.Orientation,
+                    Prop: OneSparkJs.Renderer2D.StagePropType,
+                    Sprite: OneSparkJs.Renderer2D.SpritePropType,
+                    Tileset: OneSparkJs.Renderer2D.TilesetPropType,
+                    Transform: {
+                         AnchorType: OneSparkJs.Renderer2D.AnchorTypeEnum,
+                         AnchorTransform: OneSparkJs.Renderer2D.AnchorTransformType
+                    }
+               },
           },
-          Graphics: {
-               setState: OneSparkJs.Graphics.setState,
-               getState: OneSparkJs.Graphics.getState,
-               getContext: OneSparkJs.Graphics.getContext,
-               getSize: OneSparkJs.Graphics.getSize,
-               getStyle: OneSparkJs.Graphics.getStyle,
-               publish: OneSparkJs.Graphics.publish,
-               setFullScreen: OneSparkJs.Graphics.setFullScreen
+          Canvas: {
+               setState: OneSparkJs.Canvas.setState,
+               getState: OneSparkJs.Canvas.getState,
+               getContext: OneSparkJs.Canvas.getContext,
+               getSize: OneSparkJs.Canvas.getSize,
+               getStyle: OneSparkJs.Canvas.getStyle,
+               publish: OneSparkJs.Canvas.publish,
+               setFullScreen: OneSparkJs.Canvas.setFullScreen
           },
           register: OneSparkJs.Renderer.Ext.register,
           render: OneSparkJs.Renderer.Ext.render,

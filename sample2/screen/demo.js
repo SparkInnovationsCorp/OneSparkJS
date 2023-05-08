@@ -1,6 +1,6 @@
 ﻿const Logo = await $1S.import("Logo", "../props/logo.js");
 
-class Demo extends $1S.Renderer.Type.StageType {
+class Demo extends $1S.Renderer.Type.Stage {
 
      onInit(properties) {
           this.centerX = this.width / 2;
@@ -11,21 +11,21 @@ class Demo extends $1S.Renderer.Type.StageType {
           this.initialized = false;
 
           //turn on z depth sorting for rendering.  by default, its by priority unless this is set.
-          this.setRenderSort($1S.Renderer.Type.SortBy.ByDepth);
+          this.setRenderSort($1S.Renderer.Type.SortBy.byDepth);
 
-          this.layoutContainer = new $1S.Renderer.Type.TilesetType("demo", { width: this.width, height: this.height, x: 0, y: 0, z: 0, alignOn: $1S.Renderer.Type.AlignOn.UpperLeft });
+          this.layoutContainer = new $1S.Renderer.Type.Render2D.Tileset("demo", { width: this.width, height: this.height, x: 0, y: 0, z: 0, alignment: $1S.Renderer.Type.Render2D.AlignOn.UpperLeft });
           this.registerProp(this.layoutContainer);
 
-          this.sprite = new $1S.Renderer.Type.SpriteType({ groupName: "walk-right", framesPerSecond: 12, x: 200, y: 200, z: 200 });
+          this.sprite = new $1S.Renderer.Type.Render2D.Sprite({ groupName: "walk-right", framesPerSecond: 12, x: 200, y: 200, z: 200, xScale: 0.75, yScale: 0.75 });
           this.registerProp(this.sprite);
 
-          this.logo = new Logo({ x: 200, y: 150, z: 450, alignOn: $1S.Renderer.Type.AlignOn.UpperLeft });
+          this.logo = new Logo({ x: 200, y: 150, z: 450, alignment: $1S.Renderer.Type.Render2D.AlignOn.UpperLeft });
           this.registerProp(this.logo);
 
           var btn = new $1S.UI.Controls.Button(
                {
                     x: this.width / 2,
-                    y: 670,
+                    y: 570,
                     z: 1000,
                     fontSize: 16,
                     width: 200,
@@ -85,7 +85,7 @@ class Demo extends $1S.Renderer.Type.StageType {
                this.sprite.show(this.points[this.currentSegment].group);
 
                //we tie z to y.  The lower on the screen, the closer to the camera.
-               this.sprite.z = this.sprite.y;
+               this.sprite.orientation.z = this.sprite.orientation.y;
           }
 
           // Calculate the sprite's position based on the current segment
@@ -100,8 +100,8 @@ class Demo extends $1S.Renderer.Type.StageType {
           };
 
           // Set the sprite's position to the new position
-          this.sprite.x = newPosition.x;
-          this.sprite.y = newPosition.y;
+          this.sprite.orientation.x = newPosition.x;
+          this.sprite.orientation.y = newPosition.y;
      }
 
      calculateTimePerSegment(points) {

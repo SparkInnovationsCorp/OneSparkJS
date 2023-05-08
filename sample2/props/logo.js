@@ -1,4 +1,4 @@
-﻿class Logo extends $1S.Renderer.Type.StagePropType {
+﻿class Logo extends $1S.Renderer.Type.Render2D.Prop {
 
      onInit(properties) {
           this.width = 600;
@@ -6,8 +6,6 @@
           this.workCanvas.width = this.width;
           this.workCanvas.height = this.height;
           this.workContext = this.workCanvas.getContext('2d')
-
-          this.isDrawn = true;
      }
 
      onDraw(context) {

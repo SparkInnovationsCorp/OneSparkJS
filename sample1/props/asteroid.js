@@ -1,4 +1,4 @@
-﻿class Asteroid extends $1S.Physics.Types.PhysicsBoundType {
+﻿class Asteroid extends $1S.Physics.Type.PhysicsBound {
 
      onInit(properties) {
           this.radius = Math.floor(Math.random() * 100) + 5;
@@ -40,31 +40,31 @@
           }
 
           //get screen size
-          const size = $1S.Renderer.Graphics.getSize();
+          const size = $1S.Renderer.Canvas.getSize();
 
           const side = Math.floor(Math.random() * 4);
           switch (side) {
                case 0: // left
-                    this.x = -this.width;
-                    this.y = Math.random() * size.height;
+                    this.orientation.x = -this.width;
+                    this.orientation.y = Math.random() * size.height;
                     this.vectorX = Math.random() * 0.1 + 0.1;
                     this.vectorY = Math.random() * 0.2 - 0.1;
                     break;
                case 1: // top
-                    this.x = Math.random() * size.width;
-                    this.y = -this.height;
+                    this.orientation.x = Math.random() * size.width;
+                    this.orientation.y = -this.height;
                     this.vectorX = Math.random() * 0.2 - 0.1;
                     this.vectorY = Math.random() * 0.1 + 0.1;
                     break;
                case 2: // right
-                    this.x = size.width;
-                    this.y = Math.random() * size.height;
+                    this.orientation.x = size.width;
+                    this.orientation.y = Math.random() * size.height;
                     this.vectorX = Math.random() * -0.1 - 0.1;
                     this.vectorY = Math.random() * 0.2 - 0.1;
                     break;
                case 3: // bottom
-                    this.x = Math.random() * size.width;
-                    this.y = size.height;
+                    this.orientation.x = Math.random() * size.width;
+                    this.orientation.y = size.height;
                     this.vectorX = Math.random() * 0.2 - 0.1;
                     this.vectorY = Math.random() * -0.1 - 0.1;
                     break;
@@ -74,7 +74,7 @@
      }
 
      onCollision(collisionObjects) {
-          $1S.Renderer.get().Instance.asteroidCollision(this, collisionObjects);
+          $1S.Renderer.get().instance.asteroidCollision(this, collisionObjects);
      }
 
      onDraw(context) {

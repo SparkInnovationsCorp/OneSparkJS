@@ -1,6 +1,6 @@
 ﻿const Ball = await $1S.import("Ball", "../props/ball.js");
 
-class Demo extends $1S.Renderer.Type.StageType {
+class Demo extends $1S.Renderer.Type.Stage {
 
      onInit(properties) {
 

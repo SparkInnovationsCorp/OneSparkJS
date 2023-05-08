@@ -4,7 +4,7 @@
 
      OneSparkJs.UI = (() => {
 
-          class UiType extends $1S.Renderer.Type.StagePropType {
+          class UiType extends $1S.Renderer.Type.Render2D.Prop {
 
                constructor(properties = {}) {
                     super(properties)
@@ -57,7 +57,7 @@
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_MOVE,
                          this.id,
                          (event) => {
-                              $1S.Renderer.Graphics.getStyle().cursor = "pointer";
+                              $1S.Renderer.Canvas.getStyle().cursor = "pointer";
                               return true;
                          },
                          100, region);
@@ -66,7 +66,7 @@
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_ENTER,
                          this.id,
                          (event) => {
-                              $1S.Renderer.Graphics.getStyle().cursor = "pointer";
+                              $1S.Renderer.Canvas.getStyle().cursor = "pointer";
                               return true;
                          },
                          100, region);
@@ -74,7 +74,7 @@
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_LEAVE,
                          this.id,
                          (event) => {
-                              $1S.Renderer.Graphics.getStyle().cursor = "default";
+                              $1S.Renderer.Canvas.getStyle().cursor = "default";
                               return true;
                          },
                          100, region);
@@ -163,7 +163,7 @@
 
                //Destroying component
                onDispose() {
-                    $1S.Renderer.Graphics.getStyle().cursor = "default";
+                    $1S.Renderer.Canvas.getStyle().cursor = "default";
                     $1S.IO.Input.release(this.id);
                }
 
@@ -282,7 +282,7 @@
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_MOVE,
                          this.id,
                          (event) => {
-                              $1S.Renderer.Graphics.getStyle().cursor = "pointer";
+                              $1S.Renderer.Canvas.getStyle().cursor = "pointer";
                               return true;
                          },
                          100, region);
@@ -291,7 +291,7 @@
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_ENTER,
                          this.id,
                          (event) => {
-                              $1S.Renderer.Graphics.getStyle().cursor = "pointer";
+                              $1S.Renderer.Canvas.getStyle().cursor = "pointer";
                               return true;
                          },
                          100, region);
@@ -299,7 +299,7 @@
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_LEAVE,
                          this.id,
                          (event) => {
-                              $1S.Renderer.Graphics.getStyle().cursor = "default";
+                              $1S.Renderer.Canvas.getStyle().cursor = "default";
                               return true;
                          },
                          100, region);
@@ -363,14 +363,14 @@
                     context.textBaseline = "middle";
 
                     if (this.state == "down") {
-                         this.x += 2;
-                         this.y += 2;
+                         this.orientation.x += 2;
+                         this.orientation.y += 2;
                          this.state = null;
                          this.stateIsDown = true;
                     }
                     else if (this.state == "up") {
-                         this.x -= 2;
-                         this.y -= 2;
+                         this.orientation.x -= 2;
+                         this.orientation.y -= 2;
                          this.state = null;
                          this.stateIsDown = false;
                     }
@@ -382,7 +382,7 @@
                }
 
                onDispose() {
-                    $1S.Renderer.Graphics.getStyle().cursor = "default";
+                    $1S.Renderer.Canvas.getStyle().cursor = "default";
                     $1S.IO.Input.release(this.id);
                }
           }
@@ -404,31 +404,31 @@
                }
 
                moveToPosition(x, y, ms, callback) {
-                    this.startX = this.target.x;
-                    this.startY = this.target.y;
+                    this.startX = this.target.orientation.x;
+                    this.startY = this.target.orientation.y;
                     this.targetX = x;
                     this.targetY = y;
                     this.milliSeconds = ms;
-                    const distance = Math.sqrt((x - this.target.x) ** 2 + (y - this.target.y) ** 2);
+                    const distance = Math.sqrt((x - this.target.orientation.x) ** 2 + (y - this.target.orientation.y) ** 2);
                     this.speed = distance / ms;
                     this.callback = callback;
                }
 
                onTick(timeStamp, deltaTime) {
 
-                    if (this.target.x == this.targetX && this.target.y == this.targetY)
+                    if (this.target.orientation.x == this.targetX && this.target.orientation.y == this.targetY)
                          return;
 
                     const elapsedTime = deltaTime;
-                    const deltaX = this.targetX - this.target.x;
-                    const deltaY = this.targetY - this.target.y;
+                    const deltaX = this.targetX - this.target.orientation.x;
+                    const deltaY = this.targetY - this.target.orientation.y;
                     const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
 
                     if (distance > 0) {
                          const moveDistance = this.speed * elapsedTime;
                          if (moveDistance >= distance) {
-                              this.target.x = this.targetX;
-                              this.target.y = this.targetY;
+                              this.target.orientation.x = this.targetX;
+                              this.target.orientation.y = this.targetY;
                               this.speed = 0;
                               if (this.callback) {
                                    this.callback();
@@ -436,8 +436,8 @@
                          } else {
                               const moveX = (deltaX / distance) * moveDistance;
                               const moveY = (deltaY / distance) * moveDistance;
-                              this.target.x += moveX;
-                              this.target.y += moveY;
+                              this.target.orientation.x += moveX;
+                              this.target.orientation.y += moveY;
                          }
                     }
                }

@@ -16,7 +16,7 @@
           class ExtensionType {
                constructor(priority = 0) {
                     extensions.push({
-                         Instance: this,
+                         instance: this,
                          Priority: priority
                     });
 
@@ -55,8 +55,8 @@
                var numLoaded = 0;
 
                extensions.forEach(ext => {
-                    if (ext.Instance.onLoad) {
-                         ext.Instance.onLoad(appPath, properties, () => {
+                    if (ext.instance.onLoad) {
+                         ext.instance.onLoad(appPath, properties, () => {
                               numLoaded++;
                               if (numLoaded === numExtensions) {
                                    callback();
@@ -91,7 +91,7 @@
 
                stopClock();
 
-               $1S.Renderer.Graphics.clear();
+               $1S.Renderer.Canvas.clear();
 
                OneStartJS.Stage.reset();
 
@@ -115,15 +115,15 @@
                     }
 
                     extensions.forEach(ext => {
-                         if (ext.Instance.handleTickEvent) {
-                              ext.Instance.handleTickEvent(timeStamp, deltaTime);
+                         if (ext.instance.handleTickEvent) {
+                              ext.instance.handleTickEvent(timeStamp, deltaTime);
                          };
                     });
 
                     //post tick
                     extensions.forEach(ext => {
-                         if (ext.Instance.handlePostTickEvent) {
-                              ext.Instance.handlePostTickEvent(timeStamp, deltaTime);
+                         if (ext.instance.handlePostTickEvent) {
+                              ext.instance.handlePostTickEvent(timeStamp, deltaTime);
                          };
                     });
 
@@ -151,7 +151,7 @@
           const registerExtension = (obj, priority = 0) => {
                if (obj instanceof ExtensionType) {
                     extensions.push({
-                         Instance: obj,
+                         instance: obj,
                          Priority: priority
                     });
 

@@ -1,6 +1,6 @@
 ﻿const Laser = await $1S.import("Laser", "./laser.js");
 
-class Ship extends $1S.Physics.Types.PhysicsBoundType {
+class Ship extends $1S.Physics.Type.PhysicsBound {
 
      onInit(properties) {
 
@@ -37,9 +37,9 @@ class Ship extends $1S.Physics.Types.PhysicsBoundType {
      }
 
      rotate(speed) {
-          this.rotation += speed;
-          if (this.rotation < 0) this.rotation = 359;
-          if (this.rotation > 360) this.rotation = 1;
+          this.orientation.rotation += speed;
+          if (this.orientation.rotation < 0) this.orientation.rotation = 359;
+          if (this.orientation.rotation > 360) this.orientation.rotation = 1;
      }
 
      moveLeft(pressed) {
@@ -82,18 +82,20 @@ class Ship extends $1S.Physics.Types.PhysicsBoundType {
                     var laserSpeed = 0.3; //1px per ms
 
                     // Calculate the start x and y coordinates of the laser based on the ship's position and rotation
-                    var startX = this.x;
-                    var startY = this.y;
+                    var startX = this.orientation.x;
+                    var startY = this.orientation.y;
 
                     // Convert the rotation to radians before calculating the vectorX and vectorY
-                    var radians = this.rotation * Math.PI / 180;
+                    var radians = this.orientation.rotation * Math.PI / 180;
 
                     // Calculate the vectorX and vectorY of the laser based on the ship's rotation and the laserSpeed
                     var vectorX = Math.cos(radians) * laserSpeed;
                     var vectorY = Math.sin(radians) * laserSpeed;
 
+                    console.log(this.stage);
+
                     // Create a new Laser object and register it with the game's stage
-                    this.stage.Instance.registerProp(new Laser({ x: startX, y: startY, vectorX: vectorX, vectorY: vectorY, rotation: this.rotation, givesCollisions: true }));
+                    this.stage.instance.registerProp(new Laser({ x: startX, y: startY, vectorX: vectorX, vectorY: vectorY, rotation: this.orientation.rotation, givesCollisions: true }));
                }
           }
           else {
@@ -110,7 +112,7 @@ class Ship extends $1S.Physics.Types.PhysicsBoundType {
      }
 
      onCollision(collisionObjects) {
-          $1S.Renderer.get().Instance.shipCollision(collisionObjects);
+          $1S.Renderer.get().instance.shipCollision(collisionObjects);
      }
 
      onDraw(context) {

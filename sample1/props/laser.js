@@ -1,4 +1,4 @@
-﻿class Laser extends $1S.Physics.Types.PhysicsBoundType {
+﻿class Laser extends $1S.Physics.Type.PhysicsBound {
 
      onInit(properties) {
           this.width = 20;
@@ -11,7 +11,7 @@
      }
 
      destroy() {
-          const stage = $1S.Renderer.get().Instance;
+          const stage = $1S.Renderer.get().instance;
           stage.destroyProp(this.id);
      }
 
