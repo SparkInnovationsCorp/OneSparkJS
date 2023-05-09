@@ -41,6 +41,8 @@
                constructor(properties = {}) {
                     this.id = $1S.Helper.newId();
                     this.stageProps = [];  //sub props
+                    this.isActive = properties.isActive || true;
+
 
                     if (this.sortBy)
                          this.setRenderSort(this.sortBy);
@@ -60,7 +62,7 @@
 
                registerProp = (instance, properties = {}, priority = 100000) => {
 
-                    if ((!(instance instanceof OneSparkJs.Renderer2D.StagePropType)) && !(instance instanceof OneSparkJs.Renderer2D.TransformType))
+                    if ((!(instance instanceof OneSparkJs.Renderer2D.StagePropType)) && !(instance instanceof OneSparkJs.Renderer2DTransform.TransformType))
                          throw new Error("Not a StagePropType or TransformType component.");
 
                     const newRegistration = {
@@ -114,6 +116,8 @@
 
                raiseTickEvent (timeStamp, deltaTime) {
 
+                    if (!this.isActive) return;
+
                     if (this.onTick)
                          this.onTick(timeStamp, deltaTime);
 
@@ -123,6 +127,9 @@
                }
 
                raiseRenderEvent(context) {
+
+                    if (!this.isActive) return;
+
                     if (this.onDraw)
                          this.onDraw(context);
 
@@ -161,6 +168,8 @@
 
                raiseShowStageEvent() {
 
+                    if (!this.isActive) return;
+
                     if (this.stageProps.length > 0) {
                          for (var i = 0; i < this.stageProps.length; i++) {
                               if (this.stageProps[i].instance.raiseShowStageEvent)
@@ -173,6 +182,9 @@
                }
 
                raiseHideStageEvent() {
+
+                    if (!this.isActive) return;
+
                     if (this.stageProps.length > 0) {
                          for (var i = 0; i < this.stageProps.length; i++)
                               if (this.stageProps[i].instance.raiseHideStageEvent)
@@ -199,6 +211,8 @@
                }
 
                raiseRenderEvent = (context) => {
+                    if (!this.isActive) return;
+
                     context.clearRect(0, 0, this.width, this.height);
 
                     super.raiseRenderEvent(context);
@@ -413,7 +427,7 @@
 
                     this.width = properties.width || 100;
                     this.height = properties.height || 100;
-                    this.isVisible = properties.isShown || true;
+                    this.isVisible = properties.isVisible || true;
 
                     //get screen size
                     const size = $1S.Renderer.Canvas.getSize();
@@ -537,6 +551,8 @@
                }
 
                raiseRenderEvent = (context) => {
+
+                    if (!this.isActive) return;
 
                     if (!this.isVisible) return;
 
@@ -879,6 +895,12 @@
 
           }
 
+          return { AlignOnEnum, Orientation, StagePropType, SpritePropType, TilesetPropType }
+     })();
+
+     //Rederer module
+     OneSparkJs.Renderer2DTransform = (() => {
+
           //prop transforms
           class TransformType {
 
@@ -1075,7 +1097,7 @@
 
           }
 
-          return { AlignOnEnum, Orientation, StagePropType, SpritePropType, TilesetPropType, TransformType, AnchorTypeEnum, AnchorTransformType}
+          return { TransformType, AnchorTypeEnum, AnchorTransformType }
      })();
 
      // Graphics module
@@ -1233,8 +1255,9 @@
                     Sprite: OneSparkJs.Renderer2D.SpritePropType,
                     Tileset: OneSparkJs.Renderer2D.TilesetPropType,
                     Transform: {
-                         AnchorType: OneSparkJs.Renderer2D.AnchorTypeEnum,
-                         AnchorTransform: OneSparkJs.Renderer2D.AnchorTransformType
+                         TransformType: OneSparkJs.Renderer2DTransform.TransformType,
+                         AnchorType: OneSparkJs.Renderer2DTransform.AnchorTypeEnum,
+                         AnchorTransform: OneSparkJs.Renderer2DTransform.AnchorTransformType
                     }
                },
           },

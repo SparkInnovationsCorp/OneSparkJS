@@ -163,6 +163,8 @@
                raiseTickEvent(timeStamp, deltaTime) {
                     super.raiseTickEvent(timeStamp, deltaTime);
 
+                    if (!this.isActive) return;
+
                     for (var i = 0; i < this.physicsModifiers.length; i++)
                          this.physicsModifiers[i].instance.onTick(timeStamp, deltaTime);
 
@@ -174,6 +176,8 @@
 
                raiseResizeEvent = (w, h) => {
                     super.raiseResizeEvent(w, h);
+
+                    if (!this.isActive) return;
 
                     for (var i = 0; i < this.physicsModifiers.length; i++)
                          if (this.physicsModifiers[i].onResize)

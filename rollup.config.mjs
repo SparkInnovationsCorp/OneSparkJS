@@ -34,14 +34,5 @@ export default {
  */`
   },
   plugins: [
-    uglify({ 
-        mangle: true,
-        output: {
-          comments: /OneSparkJS JavaScript Game Engine/,
-        }
-      }),
-	obfuscator({
-		options: {}
-	})
   ],
 };
