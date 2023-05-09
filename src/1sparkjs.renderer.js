@@ -491,21 +491,13 @@
 
                setRegion(region) {
 
-                    const ratio = this.width / this.height;
-
                     var regionWidth = Math.abs(region.x2 - region.x1);
-                    var regionHeight = (regionHeight / this.height);
+                    var regionHeight = Math.abs(region.y2 - region.y1);
 
-                    var adjustedHeight = regionWidth / ratio;
+                    this.orientation.xScale = regionWidth / this.width;
+                    this.orientation.yScale = regionHeight / this.height;
 
-                    if (adjustedHeight > regionHeight) {
-                         adjustedHeight = regionHeight;
-                         this.orientation.xScale = (adjustedHeight / this.height);
-                         this.orientation.yScale = this.orientation.xScale;
-                    } else {
-                         this.orientation.xScale = (regionWidth / this.width);
-                         this.orientation.yScale = this.orientation.xScale;
-                    }
+                    console.log(region, this.orientation);
 
                     switch (this.orientation.alignment) {
                          case AlignOnEnum.Center:
@@ -514,7 +506,7 @@
                               break;
                          case AlignOnEnum.UpperLeft:
                               this.orientation.x = region.x1;
-                              this.orientation.y = region.y1;
+                              this.orientation.y = region.y1; 
                               break;
                          case AlignOnEnum.UpperRight:
                               this.orientation.x = region.x2;
@@ -962,6 +954,7 @@
                     this.anchorTopValue = properties.anchorTopValue || 0;
                     this.anchorBottom = properties.anchorBottom || AnchorTypeEnum.None;
                     this.anchorBottomValue = properties.anchorBottomValue || 0;
+                    this.keepAspectRatio = properties.keepAspectRatio || false;
 
                     this.updateRegion();
 
@@ -974,24 +967,28 @@
                }
 
                updateRegion() {
+                    var childWidth = this.child.width * this.child.orientation.xScale;
+                    var childHeight = this.child.height * this.child.orientation.yScale;
+                    const childRatio = childWidth / childHeight;
+
                     //left
                     if (this.anchorLeft == AnchorTypeEnum.Absolute) {
                          this.childRegion.x1 = this.anchorLeftValue;
 
                          if (this.anchorRight == AnchorTypeEnum.None)
-                              this.childRegion.x2 = this.childRegion.x1 + this.child.width;
+                              this.childRegion.x2 = this.childRegion.x1 + childWidth;
                     }
                     else if (this.anchorLeft == AnchorTypeEnum.Relative) {
                          this.childRegion.x1 = this.parent.width * (this.anchorLeftValue / 100);
 
                          if (this.anchorRight == AnchorTypeEnum.None)
-                              this.childRegion.x2 = this.childRegion.x1 + this.child.width;
+                              this.childRegion.x2 = this.childRegion.x1 + childWidth;
                     }
                     else if (this.anchorLeft == AnchorTypeEnum.Centered) {
-                         this.childRegion.x1 = ((this.parent.width / 2) - (this.child.width / 2)) - this.anchorLeftValue;
+                         this.childRegion.x1 = ((this.parent.width / 2) - (childWidth / 2)) - this.anchorLeftValue;
 
                          if (this.anchorRight == AnchorTypeEnum.None)
-                              this.childRegion.x2 = this.childRegion.x1 + this.child.width;
+                              this.childRegion.x2 = this.childRegion.x1 + childWidth;
                     }
 
                     //right
@@ -999,56 +996,77 @@
                          this.childRegion.x2 = this.parent.width - this.anchorRightValue;
 
                          if (this.anchorLeft == AnchorTypeEnum.None)
-                              this.childRegion.x1 = this.childRegion.x2 - this.child.width;
+                              this.childRegion.x1 = this.childRegion.x2 - childWidth;
                     }
                     else if (this.anchorRight == AnchorTypeEnum.Relative) {
                          this.childRegion.x2 = this.parent.width - (this.parent.width * (this.anchorRightValue / 100));
 
                          if (this.anchorLeft == AnchorTypeEnum.None)
-                              this.childRegion.x1 = this.childRegion.x2 - this.child.width;
+                              this.childRegion.x1 = this.childRegion.x2 - childWidth;
                     }
                     else if (this.anchorRight == AnchorTypeEnum.Centered) {
-                         this.childRegion.x2 = (this.parent.width - ((this.parent.width / 2) - (this.child.width / 2))) + this.anchorRightValue;
+                         this.childRegion.x2 = (this.parent.width - ((this.parent.width / 2) - (childWidth / 2))) + this.anchorRightValue;
 
                          if (this.anchorLeft == AnchorTypeEnum.None)
-                              this.childRegion.x1 = this.childRegion.x2 - this.child.width;
+                              this.childRegion.x1 = this.childRegion.x2 - childWidth;
+                    }
+
+                    if (this.keepAspectRatio && this.anchorLeft != AnchorTypeEnum.None && this.anchorRight != AnchorTypeEnum.None) {
+
+                         childWidth = Math.abs(this.childRegion.x2 - this.childRegion.x1);
+                         childHeight = childWidth / childRatio;
                     }
 
                     //top
                     if (this.anchorTop == AnchorTypeEnum.Absolute) {
-
                          this.childRegion.y1 = this.anchorTopValue;
+
                          if (this.anchorBottom == AnchorTypeEnum.None) {
-                              this.childRegion.y2 = this.childRegion.y1 + this.child.height;
+                              this.childRegion.y2 = this.childRegion.y1 + childHeight;
                          }
                     } else if (this.anchorTop == AnchorTypeEnum.Relative) {
                          this.childRegion.y1 = this.parent.height * (this.anchorTopValue / 100);
                          if (this.anchorBottom == AnchorTypeEnum.None) {
-                              this.childRegion.y2 = this.childRegion.y1 + this.child.height;
+                              this.childRegion.y2 = this.childRegion.y1 + childHeight;
                          }
                     } else if (this.anchorTop == AnchorTypeEnum.Centered) {
-                         this.childRegion.y1 = ((this.parent.height / 2) - (this.child.height / 2)) - this.anchorTopValue;
+                         this.childRegion.y1 = ((this.parent.height / 2) - (childHeight / 2)) - this.anchorTopValue;
                          if (this.anchorBottom == AnchorTypeEnum.None) {
-                              this.childRegion.y2 = this.childRegion.y1 + this.child.height;
+                              this.childRegion.y2 = this.childRegion.y1 + childHeight;
                          }
                     }
 
                     //bottom
                     if (this.anchorBottom == AnchorTypeEnum.Absolute) {
+
                          this.childRegion.y2 = this.parent.height - this.anchorBottomValue;
+
                          if (this.anchorTop == AnchorTypeEnum.None) {
-                              this.childRegion.y1 = this.childRegion.y2 - this.child.height;
+                              this.childRegion.y1 = this.childRegion.y2 - childHeight;
                          }
+
                     } else if (this.anchorBottom == AnchorTypeEnum.Relative) {
                          this.childRegion.y2 = this.parent.height - (this.parent.height * (this.anchorBottomValue / 100));
                          if (this.anchorTop == AnchorTypeEnum.None) {
-                              this.childRegion.y1 = this.childRegion.y2 - this.child.height;
+                              this.childRegion.y1 = this.childRegion.y2 - childHeight;
                          }
                     } else if (this.anchorBottom == AnchorTypeEnum.Centered) {
-                         this.childRegion.y2 = (this.parent.height - ((this.parent.height / 2) - (this.child.height / 2))) + this.anchorBottomValue;
+                         this.childRegion.y2 = (this.parent.height - ((childHeight / 2) - (childHeight / 2))) + this.anchorBottomValue;
                          if (this.anchorTop == AnchorTypeEnum.None) {
-                              this.childRegion.y1 = this.childRegion.y2 - this.child.height;
+                              this.childRegion.y1 = this.childRegion.y2 - childHeight;
                          }
+                    }
+
+                    if (this.anchorLeft != AnchorTypeEnum.None && this.anchorRight != AnchorTypeEnum.None &&
+                         this.anchorTop != AnchorTypeEnum.None && this.anchorBottom != AnchorTypeEnum.None) {
+
+                         childWidth = Math.abs(this.childRegion.x2 - this.childRegion.x1);
+                         childHeight = Math.abs(this.childRegion.x2 - this.childRegion.x1);
+                    }
+                    else if (this.keepAspectRatio && this.anchorTop != AnchorTypeEnum.None && this.anchorBottom != AnchorTypeEnum.None) {
+
+                         childHeight = Math.abs(this.childRegion.x2 - this.childRegion.x1);
+                         childWidth = childRatio * childHeight;
                     }
 
                     this.child.setRegion(this.childRegion);
