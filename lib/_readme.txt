@@ -1,0 +1,1 @@
+﻿Use this folder to build a reusable library of generic stage prop components

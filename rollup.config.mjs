@@ -34,5 +34,17 @@ export default {
  */`
   },
   plugins: [
+  /*
+     commented out for debuging
+    uglify({ 
+        mangle: true,
+        output: {
+          comments: /OneSparkJS JavaScript Game Engine/,
+        }
+      }),
+	obfuscator({
+		options: {}
+	})
+  */
   ],
 };

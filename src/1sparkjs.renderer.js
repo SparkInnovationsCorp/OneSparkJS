@@ -511,8 +511,6 @@
                     this.orientation.xScale = regionWidth / this.width;
                     this.orientation.yScale = regionHeight / this.height;
 
-                    console.log(region, this.orientation);
-
                     switch (this.orientation.alignment) {
                          case AlignOnEnum.Center:
                               this.orientation.x = region.x1 + ((region.x2 - region.x1) / 2);
@@ -737,7 +735,6 @@
                }
 
                onInit(properties) {
-                    console.log("SpritePropType onInit");
                }
 
                onTick(timeStamp, deltaTime) {
@@ -979,9 +976,6 @@
                     this.keepAspectRatio = properties.keepAspectRatio || false;
 
                     this.updateRegion();
-
-                    console.log("AnchorTransformType");
-
                }
 
                onResize() {

@@ -428,8 +428,6 @@
                get: OneSparkJs.Application.get,
                registerExtension: OneSparkJs.Application.registerExtension
           },
-          Assets: {
-          },
           Helper: {
                newId: OneSparkJs.Helper.newId,
           },
