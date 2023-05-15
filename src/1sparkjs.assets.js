@@ -157,6 +157,7 @@
                                    // Draw the image onto the canvas, offset by the top-left corner of the clip path
                                    ctx.drawImage(sourceCanvas, -xMin, -yMin);
 
+                                   cpNode.Image = img;
                                    cpNode.Canvas = canvas;
                                    cpNode.CanvasContext = ctx;
 
@@ -170,6 +171,8 @@
                               this.assetSheet.loops.push(imageNode);
 
                          } else {
+
+                              imageNode.Image = img;
 
                               imageNode.Canvas = sourceCanvas;
 
