@@ -1196,8 +1196,9 @@
 
      // Graphics module
      OneSparkJs.Canvas = (() => {
-          let originalWidth = 0;
-          let originalHeight = 0;
+
+          let width = 0;
+          let height = 0;
           let fullWindow = false;
 
           let canvas2D = null;
@@ -1207,6 +1208,9 @@
 
           let canvas3D = null;
           let context3D = null;
+          let threeSupport = false;
+          let threeRenderer = null;
+
 
           let glContext = null;
 
@@ -1214,9 +1218,7 @@
 
                var targetDiv = null;
 
-               fullWindow = properties.fullWindow || false;
-
-               console.log("target", properties);
+               threeSupport = properties.threeSupport || false;
 
                if (properties.target) {
 
@@ -1237,41 +1239,46 @@
 
                     const aspectRatio = properties.aspectRatio || "16:9";
                     const [aspectWidth, aspectHeight] = aspectRatio.split(':');
-                    originalWidth = targetDiv.clientWidth;
-                    originalHeight = (originalWidth / aspectWidth) * aspectHeight;
+                    width = targetDiv.clientWidth;
+                    height = (width / aspectWidth) * aspectHeight;
 
                } else {
                     targetDiv = document.body;
-                    originalWidth = window.innerWidth;
-                    originalHeight = window.innerHeight;
+                    width = window.innerWidth;
+                    height = window.innerHeight;
                }
 
-               //3D canvas
-               canvas3D = document.createElement('canvas');
-               canvas3D.id = '1spark3D';
-               canvas3D.width = originalWidth; // Set the desired width
-               canvas3D.height = originalHeight; // Set the desired height
+               if (threeSupport)
+               {
+                    //3D canvas
+                    canvas3D = document.createElement('canvas');
+                    canvas3D.id = '1spark3D';
+                    canvas3D.width = width; // Set the desired width
+                    canvas3D.height = height; // Set the desired height
 
-               targetDiv.appendChild(canvas3D);
+                    targetDiv.appendChild(canvas3D);
 
-               context3D = canvas3D.getContext("webgl");
+                    context3D = canvas3D.getContext("webgl");
 
-               if (!context3D) {
-                    console.log("Could not initialize WebGL");
-               } else {
-                    context3D.viewportWidth = canvas3D.width;
-                    context3D.viewportHeight = canvas3D.height;
+                    if (!context3D) {
+                         console.log("Could not initialize WebGL");
+                    } else {
+                         context3D.viewportWidth = canvas3D.width;
+                         context3D.viewportHeight = canvas3D.height;
+                    }
                }
 
                //2D canvas
                canvas2D = document.createElement('canvas');
                canvas2D.id = '1spark2D';
-               canvas2D.width = originalWidth; // Set the desired width
-               canvas2D.height = originalHeight; // Set the desired height
+               canvas2D.width = width; // Set the desired width
+               canvas2D.height = height; // Set the desired height
 
-               canvas2D.style.position = 'absolute';
-               canvas2D.style.top = '0';
-               canvas2D.style.left = '0';
+               if (threeSupport) {
+                    canvas2D.style.position = 'absolute';
+                    canvas2D.style.top = '0';
+                    canvas2D.style.left = '0';
+               }
 
                targetDiv.appendChild(canvas2D);
 
@@ -1287,42 +1294,27 @@
                     workContext2D = workCanvas2D.getContext('2d');
                }
 
-               if (fullWindow) {
-                    if (document.documentElement.requestFullscreen) {
-                         document.documentElement.requestFullscreen();
-                    } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-                         document.documentElement.mozRequestFullScreen();
-                    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
-                         document.documentElement.webkitRequestFullscreen();
-                    } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-                         document.documentElement.msRequestFullscreen();
-                    }
-               }
+               //if (fullWindow) {
+               //     if (document.documentElement.requestFullscreen) {
+               //          document.documentElement.requestFullscreen();
+               //     } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+               //          document.documentElement.mozRequestFullScreen();
+               //     } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+               //          document.documentElement.webkitRequestFullscreen();
+               //     } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+               //          document.documentElement.msRequestFullscreen();
+               //     }
+               //}
 
-               // Add an event listener to detect canvas resizing
+                //Add an event listener to detect canvas resizing
                window.addEventListener('resize', () => {
 
-                    if (fullWindow) {
+                    if (canvas2D.width != width && canvas2D.height != height) {
 
-                         const width = window.innerWidth;
-                         const height = window.innerHeight;
-
-                         canvas3D.width = width; // Set the desired width
-                         canvas3D.height = height; // Set the desired height
-
-                         //3D canvas
-                         context3D = canvas3D.getContext("webgl");
-
-                         if (!context3D) {
-                              console.log("Could not initialize WebGL");
-                         } else {
-                              context3D.viewportWidth = canvas3D.width;
-                              context3D.viewportHeight = canvas3D.height;
-                         }
+                         width = canvas2D.width;
+                         height = canvas2D.height;
 
                          //2D canvas
-                         canvas2D.width = width; // Set the desired width
-                         canvas2D.height = height; // Set the desired height
                          context2D = canvas2D.getContext("2d");
 
                          if (!context2D) {
@@ -1333,6 +1325,14 @@
                               workCanvas2D.width = canvas2D.width;
                               workCanvas2D.height = canvas2D.height;
                               workContext2D = workCanvas2D.getContext('2d');
+                         }
+
+                         if (threeSupport) {
+                              canvas3D.width = width; // Set the desired width
+                              canvas3D.height = height; // Set the desired height
+
+                              if (threeRenderer)
+                                   threeRenderer.setSize(width, height);
                          }
 
                          OneSparkJs.Renderer.Ext.raiseResizeEvent(canvas2D.width, canvas2D.height);
@@ -1351,12 +1351,20 @@
                }
           }
 
-          const getGlContext = () => {
-               return glContext;
-          }
-
           const getContext = () => {
                return workContext2D;
+          }
+
+          const getThreeRenderer = () => {
+               if (threeSupport) {
+                    if (!threeRenderer) {
+                         threeRenderer = new THREE.WebGLRenderer({ context: context3D });
+                         threeRenderer.setSize(canvas3D.width, canvas3D.height);
+                    }
+                    return threeRenderer;
+               }
+
+               throw new Error("Three support not initialized.");
           }
 
           const publish = () => {
@@ -1412,7 +1420,7 @@
                initialize,
                setFullScreen,
                getContext,
-               getGlContext,
+               getThreeRenderer,
                publish,
                getState,
                setState,
@@ -1445,7 +1453,7 @@
                setState: OneSparkJs.Canvas.setState,
                getState: OneSparkJs.Canvas.getState,
                getContext: OneSparkJs.Canvas.getContext,
-               getGlContext: OneSparkJs.Canvas.getGlContext,
+               getThreeRenderer: OneSparkJs.Canvas.getThreeRenderer,
                getSize: OneSparkJs.Canvas.getSize,
                getStyle: OneSparkJs.Canvas.getStyle,
                publish: OneSparkJs.Canvas.publish,

@@ -25,28 +25,23 @@
           }
 
           const load = (appPath, properties = {}, callback = null) => {
-
                if (!appPath.endsWith('/')) {
                     appPath += '/';
                }
 
-               loadExtensions(appPath, properties, () => {
-
-                    console.log("All extensions loaded.") 
-
-                    $1S.include(`${appPath}main.js`, null, (success, errorMessage) => {
-                         if (success) {
-                              start();
-
-                         if (callback)
-                              callback();
-                         } else {
-                              console.error(errorMessage);
-                         }
+               if (properties.threeSupport) {
+                    loadThreeJS(() => {
+                         loadExtensions(appPath, properties, () => {
+                              console.log("All extensions loaded.")
+                              loadApplication(appPath);
+                         })
                     });
-
-               })
-
+               } else {
+                    loadExtensions(appPath, properties, () => {
+                         console.log("All extensions loaded.")
+                         loadApplication(appPath);
+                    })
+               }
           }
 
           const loadExtensions = (appPath, properties, callback) => {
@@ -61,6 +56,33 @@
                                    callback();
                               }
                          });
+                    }
+               });
+          }
+
+          const loadThreeJS = (callback) => {
+               // Create a script element
+               const script = document.createElement('script');
+
+               // Set the source of the script to the Three.js library URL
+               script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+
+               // Set a callback function to execute once the script is loaded
+               script.onload = callback;
+
+               // Append the script element to the document's body
+               document.body.appendChild(script);
+          }
+
+          const loadApplication = (appPath) => {
+               $1S.include(`${appPath}main.js`, null, (success, errorMessage) => {
+                    if (success) {
+                         start();
+
+                         if (callback)
+                              callback();
+                    } else {
+                         console.error(errorMessage);
                     }
                });
           }

@@ -1,0 +1,10 @@
+﻿{
+     "audio": [
+     ],
+     "images": [
+          {
+               "name": "grass",
+               "path": "/sample4/assets/images/grass.png"
+          }
+     ]
+}
