@@ -3,16 +3,19 @@
 class Ship extends $1S.Physics.Type.PhysicsBound {
 
      onInit(properties) {
-
           this.lineColor = properties.lineColor || 'black';
-
           this.mass = 0;
           this.acceleration = 0.01;
           this.steeringSpeed = 2;
           this.frictionNormal = 0.0001;
           this.frictionStop = 0.003;
           this.shot = false;
+          this.updateDrawing = true;
+          this.isAccelerating = false;
+          this.playingRocket = false;
+     }
 
+     onInitStage() {
           //rocket control w/ keyboard
           this.input = new $1S.Physics.Motion.Thrust(this, { acceleration: this.acceleration, speedCap: 0.5 });
 
@@ -20,20 +23,15 @@ class Ship extends $1S.Physics.Type.PhysicsBound {
           this.friction = new $1S.Physics.Motion.Friction(this, { frictionCoefficient: this.frictionNormal })
 
           //wraps around on screen axis
-          this.wrapAround = new $1S.Physics.Motion.WrapAround(this, { width: 800, height: 600 });
+          this.wrapAround = new $1S.Physics.Motion.WrapAround(this, { width: this._stage.width, height: this._stage.height });
 
           //register the physics modifiers with the engine that control vectorX, vectorY for this object
           this.registerPhysicsModifier(this.input);
           this.registerPhysicsModifier(this.friction);
           this.registerPhysicsModifier(this.wrapAround);
 
-          this.updateDrawing = true;
-          this.isAccelerating = false;
-
           //this is our collision border
           this.collisionBorder = $1S.Physics.Collisions.createHexagon(this.width, this.width);
-
-          this.playingRocket = false;
      }
 
      rotate(speed) {
@@ -77,7 +75,7 @@ class Ship extends $1S.Physics.Type.PhysicsBound {
 
                     $1S.Audio.play("laser");
 
-                    this.stage = $1S.Renderer.get();
+                    this.stage = $1S.Renderer.getStage();
 
                     var laserSpeed = 0.3; //1px per ms
 
@@ -112,7 +110,7 @@ class Ship extends $1S.Physics.Type.PhysicsBound {
      }
 
      onCollision(collisionObjects) {
-          $1S.Renderer.get().instance.shipCollision(collisionObjects);
+          $1S.Renderer.getStage().instance.shipCollision(collisionObjects);
      }
 
      onDraw(context) {

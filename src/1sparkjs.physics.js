@@ -399,7 +399,7 @@
                }
 
                onTick(timeStamp, deltaTime) {
-                    var stage = $1S.Renderer.get();
+                    var stage = $1S.Renderer.getStage();
 
                     var stageObjects = stage.instance.stageProps;
 
@@ -547,7 +547,7 @@
 
                detectCollisions = () => {
 
-                    const stage = $1S.Renderer.get();
+                    const stage = $1S.Renderer.getStage();
 
                     if (!stage) return;
 

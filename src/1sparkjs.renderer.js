@@ -60,10 +60,12 @@
                     }
                }
 
-               registerProp = (instance, properties = {}, priority = 100000) => {
+               registerProp(instance, properties = {}, priority = 100000) {
 
                     if ((!(instance instanceof OneSparkJs.Renderer2D.StagePropType)) && !(instance instanceof OneSparkJs.Renderer2DTransform.TransformType))
                          throw new Error("Not a StagePropType or TransformType component.");
+
+                    instance._parent = this;
 
                     const newRegistration = {
                          instance: instance,
@@ -77,7 +79,8 @@
                          this.stageProps.sort(this.sortBy.compare);
                     }
 
-                    return this.registerProp;
+                    if (instance.onRegister)
+                         instance.onRegister();
                }
 
                getProp = (id) => {
@@ -166,12 +169,33 @@
                          this.onDispose();
                }
 
-               raiseShowStageEvent() {
-
+               raiseInitStageEvent() {
                     if (!this.isActive) return;
 
                     if (this.stageProps.length > 0) {
                          for (var i = 0; i < this.stageProps.length; i++) {
+
+                              if (this._stage)
+                                   this.stageProps[i]._stage = this._stage;
+
+                              if (this.stageProps[i].instance.raiseInitStageEvent)
+                                   this.stageProps[i].instance.raiseInitStageEvent();
+
+                         }
+                    }
+                    if (this.onInitStage)
+                         this.onInitStage();
+               }
+
+               raiseShowStageEvent() {
+                    if (!this.isActive) return;
+
+                    if (this.stageProps.length > 0) {
+                         for (var i = 0; i < this.stageProps.length; i++) {
+
+                              if (this._stage)
+                                   this.stageProps[i]._stage = this._stage;
+
                               if (this.stageProps[i].instance.raiseShowStageEvent)
                                    this.stageProps[i].instance.raiseShowStageEvent();
 
@@ -210,6 +234,23 @@
                     if (this.onInit) this.onInit(properties);
                }
 
+               registerProp = (instance, properties = {}, priority = 100000) => {
+
+                    if (instance._stage) {
+                         throw new Error("Object is already a member of another stage.");
+                    }
+
+                    instance._stage = this;
+
+                    super.registerProp(instance, properties, priority);
+
+                    instance.raiseInitStageEvent();
+
+                    //if we are adding this to an active stage, initialize showStage
+                    if (this.name == $1S.Renderer.getActiveName())
+                         instance.raiseShowStageEvent();
+               }
+
                raiseRenderEvent = (context) => {
                     if (!this.isActive) return;
 
@@ -239,9 +280,7 @@
                }
 
                onLoad = (appPath, properties, oncomplete) => {
-                    if (properties.canvas) {
-                         OneSparkJs.Canvas.initialize(properties.canvas, properties.fullWindow);
-                    }
+                    OneSparkJs.Canvas.initialize(properties);
                     oncomplete()
                }
 
@@ -289,7 +328,7 @@
                     stage.instance.raiseRenderEvent(context);
                }
 
-               get = () => {
+               getStage = () => {
                     var stage = null;
 
                     if (this.activeStageName != null) {
@@ -442,6 +481,23 @@
                     if ((!skipInit) && this.onInit) this.onInit(properties);
                }
 
+               registerProp = (instance, properties = {}, priority = 100000) => {
+
+                    if (this._stage)
+                         instance._stage = this._stage;
+
+                    super.registerProp(instance, properties, priority);
+
+                    if (this._stage) {
+                         instance.raiseInitStageEvent();
+
+                         //if we are adding this to an active stage, initialize showStage
+                         if (instance._stage.name == $1S.Renderer.getActiveName())
+                              instance.raiseShowStageEvent();
+                    }
+
+               }
+
                getRegion() {
                     const xScale = this.orientation.xScale;
                     const yScale = this.orientation.yScale;
@@ -546,6 +602,18 @@
 
                hide() {
                     this.isVisible = false;
+               }
+
+               resize(w, h) {
+                    this.width = w;
+                    this.height = h;
+
+                    this.workCanvas = document.createElement('canvas');
+                    this.workCanvas.width = this.width;
+                    this.workCanvas.height = this.height;
+                    this.workContext = this.workCanvas.getContext('2d')
+
+                    this.raiseResizeEvent(this._parent.width, this._parent.height);
                }
 
                raiseRenderEvent = (context) => {
@@ -909,6 +977,13 @@
                     this.child = child;
                     this.childRegion = this.child.getRegion();
 
+                    this.child._parent == this.parent;
+
+                    if (this.parent instanceof OneSparkJs.Renderer.StageType)
+                         this.child._stage == this.parent;
+                    else
+                         this.child._stage == this.parent._stage;
+
                     if (this.onInit) this.onInit(properties);
                }
 
@@ -944,7 +1019,23 @@
                     this.child.raiseDisposeEvent();
                }
 
+               raiseInitStageEvent() {
+                    if (this.parent instanceof OneSparkJs.Renderer.StageType)
+                         this.child._stage == this.parent;
+                    else
+                         this.child._stage == this.parent._stage;
+
+                    if (this.onInitStage)
+                         this.onInitStage();
+
+                    this.child.raiseInitStageEvent();
+               }
+
                raiseShowStageEvent() {
+                    if (this.parent instanceof OneSparkJs.Renderer.StageType)
+                         this.child._stage == this.parent;
+                    else
+                         this.child._stage == this.parent._stage;
 
                     this.child.raiseShowStageEvent();
                }
@@ -975,6 +1066,10 @@
                     this.anchorBottomValue = properties.anchorBottomValue || 0;
                     this.keepAspectRatio = properties.keepAspectRatio || false;
 
+                    this.updateRegion();
+               }
+
+               onInitStage() {
                     this.updateRegion();
                }
 
@@ -1067,7 +1162,10 @@
                               this.childRegion.y1 = this.childRegion.y2 - childHeight;
                          }
                     } else if (this.anchorBottom == AnchorTypeEnum.Centered) {
-                         this.childRegion.y2 = (this.parent.height - ((childHeight / 2) - (childHeight / 2))) + this.anchorBottomValue;
+
+                         console.log(this.parent.height, childHeight);
+
+                         this.childRegion.y2 = ((this.parent.height / 2)-(childHeight / 2)) + this.anchorBottomValue;
                          if (this.anchorTop == AnchorTypeEnum.None) {
                               this.childRegion.y1 = this.childRegion.y2 - childHeight;
                          }
@@ -1085,6 +1183,8 @@
                          childWidth = childRatio * childHeight;
                     }
 
+                    console.log("setting region", this.childRegion);
+
                     this.child.setRegion(this.childRegion);
 
                }
@@ -1096,130 +1196,215 @@
 
      // Graphics module
      OneSparkJs.Canvas = (() => {
-          let canvas = null;
-          let context = null;
-          let workCanvas = null;
-          let workContext = null;
+          let originalWidth = 0;
+          let originalHeight = 0;
           let fullWindow = false;
 
-          const initialize = (canvasId, useFullWindow) => {
-               canvas = document.getElementById(canvasId);
+          let canvas2D = null;
+          let context2D = null;
+          let workCanvas2D = null;
+          let workContext2D = null;
 
-               if (useFullWindow) {
-                    fullWindow = true;
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
+          let canvas3D = null;
+          let context3D = null;
+
+          let glContext = null;
+
+          const initialize = (properties) => {
+
+               var targetDiv = null;
+
+               fullWindow = properties.fullWindow || false;
+
+               console.log("target", properties);
+
+               if (properties.target) {
+
+                    // Find the div element by its name
+                    targetDiv = document.getElementById(properties.target);
+
+                    if (!targetDiv) {
+                         alert(`${properties.canvas} not found.  Either create, or remove from configuration.`);
+                    }
+
+                    //make sure it has a css position set
+                    const computedStyle = window.getComputedStyle(targetDiv);
+                    const currentPosition = computedStyle.getPropertyValue('position');
+
+                    if (currentPosition === 'static') {
+                         targetDiv.style.position = 'relative';
+                    }
+
+                    const aspectRatio = properties.aspectRatio || "16:9";
+                    const [aspectWidth, aspectHeight] = aspectRatio.split(':');
+                    originalWidth = targetDiv.clientWidth;
+                    originalHeight = (originalWidth / aspectWidth) * aspectHeight;
+
+               } else {
+                    targetDiv = document.body;
+                    originalWidth = window.innerWidth;
+                    originalHeight = window.innerHeight;
                }
 
-               context = canvas.getContext("2d");
-               workCanvas = document.createElement('canvas');
-               workCanvas.width = canvas.width;
-               workCanvas.height = canvas.height;
-               workContext = workCanvas.getContext('2d');
+               //3D canvas
+               canvas3D = document.createElement('canvas');
+               canvas3D.id = '1spark3D';
+               canvas3D.width = originalWidth; // Set the desired width
+               canvas3D.height = originalHeight; // Set the desired height
+
+               targetDiv.appendChild(canvas3D);
+
+               context3D = canvas3D.getContext("webgl");
+
+               if (!context3D) {
+                    console.log("Could not initialize WebGL");
+               } else {
+                    context3D.viewportWidth = canvas3D.width;
+                    context3D.viewportHeight = canvas3D.height;
+               }
+
+               //2D canvas
+               canvas2D = document.createElement('canvas');
+               canvas2D.id = '1spark2D';
+               canvas2D.width = originalWidth; // Set the desired width
+               canvas2D.height = originalHeight; // Set the desired height
+
+               canvas2D.style.position = 'absolute';
+               canvas2D.style.top = '0';
+               canvas2D.style.left = '0';
+
+               targetDiv.appendChild(canvas2D);
+
+               context2D = canvas2D.getContext("2d");
+
+               if (!context2D) {
+                    console.log("Could not initialize 2D");
+               } else {
+                    //2D work canvas
+                    workCanvas2D = document.createElement('canvas');
+                    workCanvas2D.width = canvas2D.width;
+                    workCanvas2D.height = canvas2D.height;
+                    workContext2D = workCanvas2D.getContext('2d');
+               }
+
+               if (fullWindow) {
+                    if (document.documentElement.requestFullscreen) {
+                         document.documentElement.requestFullscreen();
+                    } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+                         document.documentElement.mozRequestFullScreen();
+                    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                         document.documentElement.webkitRequestFullscreen();
+                    } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+                         document.documentElement.msRequestFullscreen();
+                    }
+               }
 
                // Add an event listener to detect canvas resizing
                window.addEventListener('resize', () => {
 
                     if (fullWindow) {
-                         canvas.width = window.innerWidth;
-                         canvas.height = window.innerHeight;
-                         context = canvas.getContext("2d");
-                         workCanvas = document.createElement('canvas');
-                         workCanvas.width = canvas.width;
-                         workCanvas.height = canvas.height;
-                         workContext = workCanvas.getContext('2d');
-                    }
 
-                    context = canvas.getContext("2d");
-                    workCanvas = document.createElement('canvas');
-                    workCanvas.width = canvas.width;
-                    workCanvas.height = canvas.height;
-                    workContext = workCanvas.getContext('2d');
-                    OneSparkJs.Renderer.Ext.raiseResizeEvent(canvas.width, canvas.height);
+                         const width = window.innerWidth;
+                         const height = window.innerHeight;
+
+                         canvas3D.width = width; // Set the desired width
+                         canvas3D.height = height; // Set the desired height
+
+                         //3D canvas
+                         context3D = canvas3D.getContext("webgl");
+
+                         if (!context3D) {
+                              console.log("Could not initialize WebGL");
+                         } else {
+                              context3D.viewportWidth = canvas3D.width;
+                              context3D.viewportHeight = canvas3D.height;
+                         }
+
+                         //2D canvas
+                         canvas2D.width = width; // Set the desired width
+                         canvas2D.height = height; // Set the desired height
+                         context2D = canvas2D.getContext("2d");
+
+                         if (!context2D) {
+                              console.log("Could not initialize 2D");
+                         } else {
+                              //2D work canvas
+                              workCanvas2D = document.createElement('canvas');
+                              workCanvas2D.width = canvas2D.width;
+                              workCanvas2D.height = canvas2D.height;
+                              workContext2D = workCanvas2D.getContext('2d');
+                         }
+
+                         OneSparkJs.Renderer.Ext.raiseResizeEvent(canvas2D.width, canvas2D.height);
+                    }
                });
           }
 
           const getStyle = () => {
-               return canvas.style;
+               return canvas2D.style;
           }
 
           const getSize = () => {
                return {
-                    width: canvas.width,
-                    height: canvas.height
+                    width: canvas2D.width,
+                    height: canvas2D.height
                }
           }
 
+          const getGlContext = () => {
+               return glContext;
+          }
+
           const getContext = () => {
-               return workContext;
+               return workContext2D;
           }
 
           const publish = () => {
-               context.clearRect(0, 0, canvas.width, canvas.height);
-               context.drawImage(workCanvas, 0, 0);
+               context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+               context2D.drawImage(workCanvas2D, 0, 0);
           }
 
           const setState = (savedState) => {
                // Clear the canvas
-               context.clearRect(0, 0, canvas.width, canvas.height);
+               context2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
 
                // Restore the saved state of the canvas
                const img = new Image();
                img.onload = function () {
-                    context.drawImage(img, 0, 0);
+                    context2D.drawImage(img, 0, 0);
                };
                img.src = savedState;
           }
 
           const getState = () => {
                // Save the current state of the canvas
-               const savedState = canvas.toDataURL();
+               const savedState = canvas2D.toDataURL();
 
                return savedState;
           }
 
           //still experimental
           const setFullScreen = (fullScreenMode) => {
-
                if (fullScreenMode) {
-                    // Enter full screen mode
-                    if (canvas.requestFullscreen) {
-                         canvas.requestFullscreen();
-                    } else if (canvas.webkitRequestFullscreen) {
-                         canvas.webkitRequestFullscreen();
-                    } else if (canvas.msRequestFullscreen) {
-                         canvas.msRequestFullscreen();
+                    if (document.documentElement.requestFullscreen) {
+                         document.documentElement.requestFullscreen();
+                    } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+                         document.documentElement.mozRequestFullScreen();
+                    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                         document.documentElement.webkitRequestFullscreen();
+                    } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+                         document.documentElement.msRequestFullscreen();
                     }
-
-                    canvas.width = screen.width;
-                    canvas.height = screen.height;
-                    context = canvas.getContext("2d");
-                    workCanvas = document.createElement('canvas');
-                    workCanvas.width = canvas.width;
-                    workCanvas.height = canvas.height;
-                    workContext = workCanvas.getContext('2d');
-
                } else {
-
-                    try {
-                         // Exit full screen mode
-                         if (document.exitFullscreen) {
-                              document.exitFullscreen();
-                         } else if (document.webkitExitFullscreen) {
-                              document.webkitExitFullscreen();
-                         } else if (document.msExitFullscreen) {
-                              document.msExitFullscreen();
-                         }
-                    } catch { }
-
-                    canvas.width = originalWidth;
-                    canvas.height = originalHeight;
-                    context = canvas.getContext("2d");
-                    workCanvas = document.createElement('canvas');
-                    workCanvas.width = canvas.width;
-                    workCanvas.height = canvas.height;
-                    workContext = workCanvas.getContext('2d');
-
+                    if (document.exitFullscreen) {
+                         document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) { // Firefox
+                         document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) { // Chrome, Safari, Opera
+                         document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) { // IE/Edge
+                         document.msExitFullscreen();
+                    }
                }
           }
 
@@ -1227,6 +1412,7 @@
                initialize,
                setFullScreen,
                getContext,
+               getGlContext,
                publish,
                getState,
                setState,
@@ -1253,12 +1439,13 @@
                          AnchorType: OneSparkJs.Renderer2DTransform.AnchorTypeEnum,
                          AnchorTransform: OneSparkJs.Renderer2DTransform.AnchorTransformType
                     }
-               },
+               }
           },
           Canvas: {
                setState: OneSparkJs.Canvas.setState,
                getState: OneSparkJs.Canvas.getState,
                getContext: OneSparkJs.Canvas.getContext,
+               getGlContext: OneSparkJs.Canvas.getGlContext,
                getSize: OneSparkJs.Canvas.getSize,
                getStyle: OneSparkJs.Canvas.getStyle,
                publish: OneSparkJs.Canvas.publish,
@@ -1267,7 +1454,7 @@
           register: OneSparkJs.Renderer.Ext.register,
           render: OneSparkJs.Renderer.Ext.render,
           destroy: OneSparkJs.Renderer.Ext.destroy,
-          get: OneSparkJs.Renderer.Ext.get,
+          getStage: OneSparkJs.Renderer.Ext.getStage,
           getActiveName: OneSparkJs.Renderer.Ext.getActiveName,
           switchTo: OneSparkJs.Renderer.Ext.switchTo
      };

@@ -12,12 +12,16 @@
           this.acceleration = 0.01;
           this.steeringSpeed = 2;
           this.frictionNormal = 0.0001;
+     }
+
+     onInitStage() {
+          const stage = this._stage;
 
           //slows down over time
           //this.friction = new $1S.Physics.Motion.Friction(this, { frictionCoefficient: this.frictionNormal });
 
           //wraps around on screen axis
-          this.bounce = new $1S.Physics.Motion.Bounce(this, { width: 800, height: 600, bounceReduction: .001 });
+          this.bounce = new $1S.Physics.Motion.Bounce(this, { width: stage.width, height: stage.height, bounceReduction: .001 });
 
           //gravity
           this.gravity = new $1S.Physics.Motion.GravitationalAttraction(this, { gravityConstant: .01 });

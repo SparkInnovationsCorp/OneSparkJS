@@ -278,6 +278,8 @@
                onShowStage() {
                     const region = this.getRegion();
 
+                    console.log("Button Region", region, this.orientation, this.width, this.height);
+
                     //TODO:right now the mouse_enter and mouse_leave need this event subscribedd to.  fix this.
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_MOVE,
                          this.id,
@@ -291,6 +293,7 @@
                     $1S.IO.Input.attach($1S.IO.Input.EventType.MOUSE_ENTER,
                          this.id,
                          (event) => {
+                              console.log(event);
                               $1S.Renderer.Canvas.getStyle().cursor = "pointer";
                               return true;
                          },

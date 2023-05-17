@@ -85,25 +85,26 @@
 
                handles = {};
 
+               canvas = null;
+
                constructor() {
-                    super(0);
+                    super(10);
                }
 
                onLoad = (appPath, properties, oncomplete) => {
-                    if (properties.canvas) {
-                         const canvas = document.getElementById(properties.canvas);
+                    this.canvas = document.getElementById("1spark2D");
 
-                         canvas.addEventListener(OneSparkJs.InputEventTypes.MOUSE_MOVE, this.mouseMoveEvent);
-                         canvas.addEventListener("mousedown", this.mouseDownEvent);
-                         canvas.addEventListener(OneSparkJs.InputEventTypes.MOUSE_UP, this.mouseUpEvent);
-                         canvas.addEventListener("wheel", this.mouseScrollEvent);
-                         canvas.addEventListener("mouseenter", this.mouseCanvasEnterEvent);
-                         canvas.addEventListener("mouseleave", this.mouseCanvasLeaveEvent);
-                         canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_START, this.touchStartEvent);
-                         canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_MOVE, this.touchMoveEvent);
-                         canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_END, this.touchEndEvent);
-                         canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_CANCEL, this.touchCancelEvent);
-                    }
+                    this.canvas.addEventListener(OneSparkJs.InputEventTypes.MOUSE_MOVE, this.mouseMoveEvent);
+                    this.canvas.addEventListener("mousedown", this.mouseDownEvent);
+                    this.canvas.addEventListener(OneSparkJs.InputEventTypes.MOUSE_UP, this.mouseUpEvent);
+                    this.canvas.addEventListener("wheel", this.mouseScrollEvent);
+                    this.canvas.addEventListener("mouseenter", this.mouseCanvasEnterEvent);
+                    this.canvas.addEventListener("mouseleave", this.mouseCanvasLeaveEvent);
+                    this.canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_START, this.touchStartEvent);
+                    this.canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_MOVE, this.touchMoveEvent);
+                    this.canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_END, this.touchEndEvent);
+                    this.canvas.addEventListener(OneSparkJs.InputEventTypes.TOUCH_CANCEL, this.touchCancelEvent);
+
                     window.addEventListener(OneSparkJs.InputEventTypes.KEY_DOWN, this.keyDownEvent);
                     window.addEventListener(OneSparkJs.InputEventTypes.KEY_UP, this.keyUpEvent);
                     window.addEventListener(OneSparkJs.InputEventTypes.DEVICE_ORIENTATION, this.deviceOrientationEvent);
@@ -111,6 +112,14 @@
                     document.addEventListener(OneSparkJs.InputEventTypes.VISIBILITY_CHANGE, this.visibilityChangeEvent);
 
                     oncomplete()
+               }
+
+               transformClientCoordinate(event)
+               {
+                    const rect = this.canvas.getBoundingClientRect();
+
+                    if (event.clientX) event.canvasX = event.clientX - rect.left;
+                    if (event.clientY) event.canvasY = event.clientY - rect.top;
                }
 
                keyUpEvent = (event) => {
@@ -144,10 +153,12 @@
                };
 
                mouseMoveEvent = (event) => {
+                    this.transformClientCoordinate(event);
                     this.handleMouseEvent(event, OneSparkJs.InputEventTypes.MOUSE_MOVE);
                };
 
                mouseUpEvent = (event) => {
+                    this.transformClientCoordinate(event);
                     switch (event.button) {
                          case 0:
                               this.handleMouseEvent(event, OneSparkJs.InputEventTypes.MOUSE_UP);
@@ -162,6 +173,7 @@
                };
 
                mouseDownEvent = (event) => {
+                    this.transformClientCoordinate(event);
                     switch (event.button) {
                          case 0:
                               this.handleMouseEvent(event, OneSparkJs.InputEventTypes.MOUSE_CLICK);
@@ -176,14 +188,17 @@
                };
 
                mouseCanvasEnterEvent = (event) => {
+                    this.transformClientCoordinate(event);
                     this.handleGenericEvent(event, OneSparkJs.InputEventTypes.MOUSE_CANVAS_ENTER);
                };
 
                mouseCanvasLeaveEvent = (event) => {
+                    this.transformClientCoordinate(event);
                     this.handleGenericEvent(event, OneSparkJs.InputEventTypes.MOUSE_CANVAS_LEAVE);
                };
 
                mouseScrollEvent = (event) => {
+                    this.transformClientCoordinate(event);
                     if (event.deltaY > 0) {
                          this.handleMouseEvent(event, OneSparkJs.InputEventTypes.MOUSE_SCROLL_DOWN);
                     } else {
@@ -324,10 +339,10 @@
                          // If the handle has specified a region, check if the event is inside the region
                          if (handle.region) {
                               if (
-                                   event.clientX < handle.region.x1 ||
-                                   event.clientX > handle.region.x2 ||
-                                   event.clientY < handle.region.y1 ||
-                                   event.clientY > handle.region.y2
+                                   event.canvasX <= handle.region.x1 ||
+                                   event.canvasX >= handle.region.x2 ||
+                                   event.canvasY <= handle.region.y1 ||
+                                   event.canvasY >= handle.region.y2
                               ) {
                                    if (eventType == OneSparkJs.InputEventTypes.MOUSE_MOVE && (handle.isOver)) {
                                         handle.isOver = false;
@@ -398,10 +413,10 @@
 
                          if (handle.region) {
                               if (
-                                   event.clientX < handle.region.x1 ||
-                                   event.clientX > handle.region.x2 ||
-                                   event.clientY < handle.region.y1 ||
-                                   event.clientY > handle.region.y2
+                                   event.canvasX <= handle.region.x1 ||
+                                   event.canvasX >= handle.region.x2 ||
+                                   event.canvasY <= handle.region.y1 ||
+                                   event.canvasY >= handle.region.y2
                               ) {
                                    if (eventType == OneSparkJs.InputEventTypes.TAP) {
                                         handle.isOver = false;
@@ -427,10 +442,10 @@
 
                          if (handle.region) {
                               if (
-                                   event.clientX < handle.region.x1 ||
-                                   event.clientX > handle.region.x2 ||
-                                   event.clientY < handle.region.y1 ||
-                                   event.clientY > handle.region.y2
+                                   event.canvasX <= handle.region.x1 ||
+                                   event.canvasX >= handle.region.x2 ||
+                                   event.canvasY <= handle.region.y1 ||
+                                   event.canvasY >= handle.region.y2
                               ) {
                                    continue;
                               }
@@ -451,10 +466,10 @@
 
                          if (handle.region) {
                               if (
-                                   event.clientX < handle.region.x1 ||
-                                   event.clientX > handle.region.x2 ||
-                                   event.clientY < handle.region.y1 ||
-                                   event.clientY > handle.region.y2
+                                   event.canvasX <= handle.region.x1 ||
+                                   event.canvasX >= handle.region.x2 ||
+                                   event.canvasY <= handle.region.y1 ||
+                                   event.canvasY >= handle.region.y2
                               ) {
                                    continue;
                               }
@@ -475,10 +490,10 @@
 
                          if (handle.region) {
                               if (
-                                   event.clientX < handle.region.x1 ||
-                                   event.clientX > handle.region.x2 ||
-                                   event.clientY < handle.region.y1 ||
-                                   event.clientY > handle.region.y2
+                                   event.canvasX <= handle.region.x1 ||
+                                   event.canvasX >= handle.region.x2 ||
+                                   event.canvasY <= handle.region.y1 ||
+                                   event.canvasY >= handle.region.y2
                               ) {
                                    continue;
                               }

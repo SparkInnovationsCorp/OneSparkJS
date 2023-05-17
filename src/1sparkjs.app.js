@@ -36,11 +36,10 @@
 
                     $1S.include(`${appPath}main.js`, null, (success, errorMessage) => {
                          if (success) {
-                              if (properties.autoStart)
-                                   start();
+                              start();
 
-                              if (callback)
-                                   callback();
+                         if (callback)
+                              callback();
                          } else {
                               console.error(errorMessage);
                          }

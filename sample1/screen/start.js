@@ -65,7 +65,7 @@
                     anchorLeft: AnchorType.Centered,
                     anchorRight: AnchorType.Centered,
                     anchorBottom: AnchorType.Centered,
-                    anchorBottomValue: 50
+                    anchorBottomValue: 100
                }), {}, 10000);
 
      }

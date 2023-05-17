@@ -11,7 +11,7 @@
      }
 
      destroy() {
-          const stage = $1S.Renderer.get().instance;
+          const stage = $1S.Renderer.getStage().instance;
           stage.destroyProp(this.id);
      }
 

@@ -8,14 +8,14 @@
      <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-     <canvas id="game-canvas" width="1024" height="768"></canvas>
+     <div id="game-canvas"></div>
      <p>Left/Right Arrow Keys to turn; A = Accelerate; Z = Brake; Enter = Shoots.</p>
      <script src="dist/1sparkjs.min.js"></script>
      <script>
           window.onload = function () {
                $1S.Application.load(
                     '/sample1/',
-                    { autoStart: true, canvas: 'game-canvas' },
+                    { target: 'game-canvas' },
                     () => {
                          console.log("All scripts loaded!");
                     }

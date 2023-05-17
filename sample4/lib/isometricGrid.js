@@ -51,23 +51,12 @@
 
           this.grassImage = $1S.Assets.getImage("grass");
 
-          this.setIsometricCamera({
-               x: 250,
-               y: 420,
-               z: 0
-          });
-
      }
 
      onShowStage(properties) {
      }
 
      onTick(timeStamp, deltaTime) {
-
-          this.onTickOrbit(timeStamp, deltaTime);
-     }
-
-     onTickOrbit(timeStamp, deltaTime) {
           if (this.startTime === null) {
                // Initialize the start time
                this.startTime = timeStamp;
@@ -79,12 +68,10 @@
           // Calculate the progress of the oscillation (0 to 1)
           const progress = elapsedTime / 1000;
 
-          // Calculate the current camera position based on the progress
-          const currentCameraTarget = this.calculateCurrentCameraTarget(
-               progress,
-               { x: 250, y: 250, z: 0 },
-               { x: 250, y: 250, z: 0 }
-          );
+
+          const currentCameraTarget = {
+               x: 250, y: 250, z: 0
+          }
 
           const radians =
                ((progress * 2 * Math.PI) + this.cameraAngleToBoard) / 180 * Math.PI;
@@ -96,22 +83,14 @@
                z: currentCameraTarget.z + 100
           };
 
-          this.setCamera(camera, currentCameraTarget);
-     }
-
-     calculateCurrentCameraTarget(progress, startTarget, endTarget) {
-          return {
-               x: startTarget.x + (endTarget.x - startTarget.x) * progress,
-               y: startTarget.y + (endTarget.y - startTarget.y) * progress,
-               z: startTarget.z + (endTarget.z - startTarget.z) * progress,
-          };
+          this.setCameraPosition(camera, currentCameraTarget);
      }
 
      onDraw(context) {
           context.clearRect(0, 0, this.width, this.height);
 
           this.onDrawPerspective(context);
-          //this.onDrawTopDown(context);
+          this.onDrawTopDown(context);
      }
 
      onDrawTopDown(context) {
@@ -195,7 +174,7 @@
                const screenShape = [];
                var shapeInFront = false;
                for (let j = 0; j < squareShape.shape.length; j++) {
-                    var screenPoint = this.getPointOnScreen(squareShape.shape[j]);
+                    var screenPoint = this.projectPointOnScreen(squareShape.shape[j]);
 
                     if (screenPoint.y > 0 && screenPoint.y < this.height)
                     {
@@ -214,7 +193,7 @@
                     const bottomRight = [screenShape[2].x - minX, screenShape[2].y - minY];
                     const bottomLeft = [screenShape[3].x - minX, screenShape[3].y - minY];
 
-                    const wi = this.warpImage(grassImage.Image, topLeft, topRight, bottomLeft, bottomRight);
+                    const wi = this.warpTextureToTileShape(grassImage.Image, topLeft, topRight, bottomLeft, bottomRight);
 
                     context.drawImage(wi, minX, minY);
 
@@ -269,7 +248,7 @@
           }
      }
 
-     onResize(parentWidth, parentHeight) {
+     onResize(w, h) {
 
      }
 
@@ -289,27 +268,13 @@
      }
 
      getRandomColor() {
-          const colors = ["red", "green"];
+          const colors = ["rgba(255,0,0,0.4)", "rgba(0,255,0,0.4)"];
           const randomIndex = Math.floor(Math.random() * colors.length);
           return colors[randomIndex];
      }
 
-     setIsometricCamera(cameraTarget) {
-
-          const radians = (this.cameraAngleToBoard * Math.PI) / 180;
-
-          //camera
-          const camera = {
-               x: cameraTarget.x,
-               y: cameraTarget.y + (Math.cos(radians) * this.cameraDistanceFromBoard),
-               z: cameraTarget.z + (Math.sin(radians) * this.cameraDistanceFromBoard)
-          };
-
-          this.setCamera(camera, cameraTarget);
-
-     }
-
-     setCamera(camera, cameraTarget) {
+     //this function sets camera and target coordinates, and pre-calcs a lot of things (like the virtual screen);
+     setCameraPosition(camera, cameraTarget) {
 
           const cameraForwardVector = {
                x: cameraTarget.x - camera.x,
@@ -409,7 +374,8 @@
           this.planeConstant = planeConstant;
      };
 
-     getPointOnScreen(vertex) {
+     //this fuction calculates where a vertext would appear on your computer screen.
+     projectPointOnScreen(vertex) {
 
           if (!this.camera || !this.cameraTarget || !this.screenPlane) {
                throw new Error('screenSetup must be called before calculateVertexScreenLocation');
@@ -447,7 +413,8 @@
           }
      }
 
-     warpImage(img, topLeft, topRight, bottomLeft, bottomRight) {
+     //this function will take a tile, and stretch the perspective to fit the 3d tile on screen.
+     warpTextureToTileShape(img, topLeft, topRight, bottomLeft, bottomRight) {
 
           const utils = {
 

@@ -74,7 +74,7 @@
      }
 
      onCollision(collisionObjects) {
-          $1S.Renderer.get().instance.asteroidCollision(this, collisionObjects);
+          this._stage.asteroidCollision(this, collisionObjects);
      }
 
      onDraw(context) {

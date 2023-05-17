@@ -7,14 +7,14 @@
      <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-     <canvas id="game-canvas" width="800" height="600"></canvas>
+     <div id="game-canvas" style="width: 1024px; "></div>
      <p>In this demonstration, we have enabled bounce collisions for the balls, set a minor gravitational pull, and allowed them to rebound off the edges. Friction has been turned off to ensure perpetual bouncing. The collision zone, represented by a red hexagon, is intentionally displayed.</p>
      <script src="dist/1sparkjs.min.js"></script>
      <script>
           window.onload = function () {
                $1S.Application.load(
                     '/sample3/',
-                    { autoStart: true, canvas: 'game-canvas' },
+                    { target: 'game-canvas' },
                     () => {
                          console.log("All scripts loaded!");
                     }

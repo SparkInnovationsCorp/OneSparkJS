@@ -4,6 +4,9 @@ const Ship = await $1S.import("Ship", "../props/ship.js");
 class Game extends $1S.Renderer.Type.Stage {
 
      onInit(properties) {
+
+          console.log("onInitStage");
+
           this.resetStage();
 
           this.lblScore = new $1S.UI.Controls.Label(
